@@ -24,6 +24,7 @@ pnpm-debug.log*
 
 # These assets will be copied or created when building
 liquer-gui/liquer_gui/assets
+liquer-gui/README.md
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
