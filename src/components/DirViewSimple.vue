@@ -1,15 +1,29 @@
 <template>
-  <v-data-table :headers="headers" :items="dir_status" class="elevation-1">
-    <template v-slot:item.icon="{ item }">
-      <v-icon v-text="item.icon" />
+  <v-simple-table dense>
+    <template v-slot:default>
+      <thead>
+        <tr>
+          <th class="text-left" style="max-width:32px">
+          </th>
+          <th class="text-left">
+            Status
+          </th>
+          <th class="text-left">
+            Name
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          v-for="item in dir_status" :key="item.key"
+        >
+          <td style="max-width:32px"><v-icon v-text="icon(item)"></v-icon></td>
+          <td><ResultStatus :status="item.status"/></td>
+          <td @click="open_item(item)">{{item.name}}</td>
+        </tr>
+      </tbody>
     </template>
-    <template v-slot:item.status="{ item }">
-      <ResultStatus :status="item.status" />
-    </template>
-    <template v-slot:item.name="{ item }">
-      <span @click="open_item(item)">{{ item.name }}</span>
-    </template>
-  </v-data-table>
+  </v-simple-table>
 </template>
 
 <script>
@@ -34,17 +48,6 @@ export default {
     url_query_prefix: "/liquer/q/",
     url_submit_prefix: "/liquer/submit/",
     dir_status: [],
-    headers: [
-      {
-        text: "",
-        align: "start",
-        sortable: true,
-        value: "icon",
-        width: "32px",
-      },
-      { text: "Status", value: "status", width: "50px" },
-      { text: "Name", value: "name" },
-    ],
   }),
   methods: {
     info(message, reason = null, query = null) {
@@ -86,9 +89,6 @@ export default {
             function (data) {
               if (data.status == "OK") {
                 this.dir_status = data.data;
-                for (var i = 0; i < this.dir_status.length; i++) {
-                  this.dir_status[i].icon = this.icon(this.dir_status[i]);
-                }
               } else {
                 this.error(data.message);
               }

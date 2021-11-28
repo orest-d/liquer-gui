@@ -30,6 +30,19 @@
     <div v-if="mode == 'text'">
       {{ data }}
     </div>
+    <v-layout row wrap v-if="mode == 'dataframe'">
+      <v-flex>Pandas version: {{ data.schema.pandas_version }}
+          <v-btn :href="pcv_query">PointCloud Viewer</v-btn>
+      </v-flex>
+      <v-flex xs12 v-if="data != null">
+        <v-data-table
+          :headers="dataframe_headers"
+          :items="dataframe_rows"
+          class="elevation-1"
+        >
+        </v-data-table>
+      </v-flex>
+    </v-layout>
   </v-container>
 </template>
 
@@ -86,6 +99,9 @@ export default {
           text() {
             this.just_load("text");
           },
+          dataframe() {
+            this.just_load_json("dataframe", this.metadata.query+"/head_df-1000/data.json"); // FIXME: Handle filename
+          },
         };
         type_actions[this.metadata.type_identifier].bind(this)();
       }
@@ -106,6 +122,29 @@ export default {
         }.bind(this)
       );
     },
+    just_load_json(mode, query = null) {
+      if (query == null) {
+        query = this.metadata.query;
+      }
+      console.log("Just load JSON", query);
+      this.$http.get(this.url_query_prefix + query).then(
+        function (response) {
+          response.json().then(
+            function (data) {
+              this.data = data;
+              this.info("Data loaded.");
+              this.mode = mode;
+            }.bind(this),
+            function (reason) {
+              this.error("Json error (data)", reason);
+            }.bind(this)
+          );
+        }.bind(this),
+        function (reason) {
+          this.error("Failed loading data", reason, query);
+        }.bind(this)
+      );
+    },
   },
   watch: {
     metadata() {
@@ -113,6 +152,9 @@ export default {
     },
   },
   computed: {
+    pcv_query(){
+        return this.url_query_prefix+this.metadata.query+"/pointcloud-viewer.html"
+    },
     dataframe_headers: function () {
       if (this.data == null) {
         return [];

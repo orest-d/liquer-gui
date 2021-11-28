@@ -1,6 +1,7 @@
 # Make it run from the examples directory
 import sys
 sys.path.append("../liquer")
+sys.path.append("../liquer-pcv")
 
 from liquer import *
 import pandas as pd
@@ -8,6 +9,7 @@ import numpy as np
 import liquer.ext.basic
 import liquer.ext.meta
 import liquer.ext.lq_pandas # Add pandas support to liquer so that the dataframe conversions work
+import liquer_pcv
 from liquer.store import web_mount_folder
 from liquer.cache import set_cache, MemoryCache
 

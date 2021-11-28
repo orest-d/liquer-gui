@@ -10,7 +10,7 @@
       <v-divider></v-divider>
 
       <v-list dense nav>
-        <v-list-item link @click="mode = 'content'">
+        <v-list-item link @click="set_mode('content')">
           <v-list-item-icon>
             <v-icon>mdi-eye</v-icon>
           </v-list-item-icon>
@@ -19,7 +19,7 @@
             <v-list-item-title>Content</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
-        <v-list-item link @click="mode = 'store'">
+        <v-list-item link @click="set_mode('store')">
           <v-list-item-icon>
             <v-icon>mdi-folder</v-icon>
           </v-list-item-icon>
@@ -28,7 +28,7 @@
             <v-list-item-title>Store</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
-        <v-list-item link @click="mode = 'commands'">
+        <v-list-item link @click="set_mode('commands')">
           <v-list-item-icon>
             <v-icon>mdi-view-list</v-icon>
           </v-list-item-icon>
@@ -142,6 +142,10 @@ export default {
         this.mode="content";
         this.submit_query(item.key+"/-/dr");
       }
+    },
+    set_mode(mode){
+      this.mode=mode;
+      this.drawer=false;
     },
     updir() {
       console.log("Updir from", this.dirkey);
@@ -304,8 +308,9 @@ export default {
   },
   computed: {},
   created() {
-    this.mode="content";
-    this.submit_query("hello");
+//    this.mode="content";
+//    this.submit_query("harmonic");
+    this.mode="";
   },
 };
 </script>
