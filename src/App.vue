@@ -1,24 +1,77 @@
 <template>
   <v-app>
     <v-navigation-drawer v-model="drawer" app>
-      <!--  -->
+      <v-list-item @click="drawer = !drawer">
+        <v-list-item-content>
+          <v-list-item-title class="text-h6"> LiQuer </v-list-item-title>
+        </v-list-item-content>
+      </v-list-item>
+
+      <v-divider></v-divider>
+
+      <v-list dense nav>
+        <v-list-item link @click="mode = 'content'">
+          <v-list-item-icon>
+            <v-icon>mdi-eye</v-icon>
+          </v-list-item-icon>
+
+          <v-list-item-content>
+            <v-list-item-title>Content</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+        <v-list-item link @click="mode = 'store'">
+          <v-list-item-icon>
+            <v-icon>mdi-folder</v-icon>
+          </v-list-item-icon>
+
+          <v-list-item-content>
+            <v-list-item-title>Store</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+        <v-list-item link @click="mode = 'commands'">
+          <v-list-item-icon>
+            <v-icon>mdi-view-list</v-icon>
+          </v-list-item-icon>
+
+          <v-list-item-content>
+            <v-list-item-title>Commands</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+        <v-divider></v-divider>
+        <v-list-item link href="https://github.com/orest-d/liquer">
+          <v-list-item-icon>
+            <v-icon>mdi-home</v-icon>
+          </v-list-item-icon>
+          <v-list-item-content>
+            <v-list-item-title> LiQuer Home </v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+      </v-list>
     </v-navigation-drawer>
 
     <v-app-bar app dense>
       <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
-
-      <v-toolbar-title>Application</v-toolbar-title>
+      <v-toolbar-title>LiQuer</v-toolbar-title>
     </v-app-bar>
-
     <v-main>
       <!--  -->
-      <v-btn @click="updir()">Up</v-btn>
-      <DirView :dirkey="dirkey" @message-event="message_event($event)" @open-event="open_event($event)"/>
-      
-      <Content v-if="false" :metadata="metadata"  @message-event="message_event($event)"/>
+
+      <v-btn v-if="mode == 'store'" @click="updir()">Up</v-btn>
+      <DirView
+        v-if="mode == 'store'"
+        :dirkey="dirkey"
+        @message-event="message_event($event)"
+        @open-event="open_event($event)"
+      />
+
+      <Content
+        v-if="mode == 'content'"
+        :metadata="metadata"
+        @message-event="message_event($event)"
+      />
 
       <Commands
-        v-if="false"
+        v-if="mode == 'commands'"
         :liquer_url="liquer_url"
         @message-event="message_event($event)"
       />
@@ -40,14 +93,15 @@ export default {
     StatusBar,
     Commands,
     Content,
-    DirView
+    DirView,
   },
 
   data: () => ({
     drawer: false,
+    mode: "",
     query: "",
     data: null,
-    dirkey:"",
+    dirkey: "",
     metadata: null,
     status: "OK",
     message: "",
@@ -79,10 +133,14 @@ export default {
       this.status = m.status;
       this.message_event_object = m;
     },
-    open_event(item){
-        console.log("Open",item);
-      if (item.is_dir){
-          this.dirkey = item.key;
+    open_event(item) {
+      console.log("Open", item);
+      if (item.is_dir) {
+        this.dirkey = item.key;
+      }
+      else{
+        this.mode="content";
+        this.submit_query(item.key+"/-/dr");
       }
     },
     updir() {
@@ -127,7 +185,7 @@ export default {
         this.url_query_prefix +
         this.query_basis(query) +
         "/state/metadata.json";
-      console.log("GET",url);
+      console.log("GET", url);
       this.$http.get(url).then(
         function (response) {
           response.json().then(
@@ -246,6 +304,7 @@ export default {
   },
   computed: {},
   created() {
+    this.mode="content";
     this.submit_query("hello");
   },
 };
