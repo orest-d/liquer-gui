@@ -38,3 +38,8 @@ Webapp cab be compiled from sources with the script [build_liquer_gui.sh](https:
 ```
 bash buils_liquer_gui.sh
 ```
+
+# News
+
+- 2020-11-28 - v0.0.1  - initial release
+- 2020-11-28 - v0.0.2  - improving directory view

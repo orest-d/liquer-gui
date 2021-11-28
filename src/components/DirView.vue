@@ -44,6 +44,11 @@ export default {
       },
       { text: "Status", value: "status", width: "50px" },
       { text: "Name", value: "name" },
+      { text: "Characteristics", value: "data_characteristics" },
+      { text: "Message", value: "message" },
+      { text: "Title", value: "title" },
+      { text: "Updated", value: "updated" },
+      { text: "Size", value: "size" },
     ],
   }),
   methods: {
