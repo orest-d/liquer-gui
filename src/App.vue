@@ -12,7 +12,10 @@
 
     <v-main>
       <!--  -->
-      <Content :metadata="metadata"  @message-event="message_event($event)"/>
+      <v-btn @click="updir()">Up</v-btn>
+      <DirView :dirkey="dirkey" @message-event="message_event($event)" @open-event="open_event($event)"/>
+      
+      <Content v-if="false" :metadata="metadata"  @message-event="message_event($event)"/>
 
       <Commands
         v-if="false"
@@ -28,6 +31,7 @@
 import StatusBar from "./components/StatusBar";
 import Commands from "./components/Commands";
 import Content from "./components/Content";
+import DirView from "./components/DirView";
 
 export default {
   name: "App",
@@ -35,13 +39,15 @@ export default {
   components: {
     StatusBar,
     Commands,
-    Content
+    Content,
+    DirView
   },
 
   data: () => ({
     drawer: false,
     query: "",
     data: null,
+    dirkey:"",
     metadata: null,
     status: "OK",
     message: "",
@@ -73,6 +79,19 @@ export default {
       this.status = m.status;
       this.message_event_object = m;
     },
+    open_event(item){
+        console.log("Open",item);
+      if (item.is_dir){
+          this.dirkey = item.key;
+      }
+    },
+    updir() {
+      console.log("Updir from", this.dirkey);
+      this.dirkey = this.dirkey.split("/").slice(0, -1).join("/");
+      console.log("Updir to", this.dirkey);
+      this.fetch_dir_status(this.dirkey);
+    },
+
     load_cache_metadata(query = null, callback = () => {}) {
       if (query == null) {
         query = this.query;

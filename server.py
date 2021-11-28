@@ -1,6 +1,6 @@
 # Make it run from the examples directory
 import sys
-sys.path.append("../../../liquer")
+sys.path.append("../liquer")
 
 from liquer import *
 import pandas as pd
