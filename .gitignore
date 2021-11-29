@@ -114,3 +114,8 @@ venv.bak/
 # mypy
 .mypy_cache/
 
+# Recipes might create these
+*.parquet
+*.xlsx
+recipes_status.txt
+__metadata__

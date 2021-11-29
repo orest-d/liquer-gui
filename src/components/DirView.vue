@@ -4,10 +4,15 @@
       <v-icon v-text="item.icon" />
     </template>
     <template v-slot:item.status="{ item }">
-      <ResultStatus :status="item.status" />
+      <ResultStatus v-if="!item.is_dir" :status="item.status" />
     </template>
     <template v-slot:item.name="{ item }">
       <span @click="open_item(item)">{{ item.name }}</span>
+    </template>
+    <template v-slot:item.control="{ item }">
+        <v-btn v-if="can_rerun(item)" @click="remove_key(item.key)">
+            <v-icon>mdi-autorenew</v-icon>
+        </v-btn>
     </template>
   </v-data-table>
 </template>
@@ -33,6 +38,7 @@ export default {
   data: () => ({
     url_query_prefix: "/liquer/q/",
     url_submit_prefix: "/liquer/submit/",
+    url_remove_prefix: "/liquer/api/store/remove/",
     dir_status: [],
     headers: [
       {
@@ -49,6 +55,7 @@ export default {
       { text: "Title", value: "title" },
       { text: "Updated", value: "updated" },
       { text: "Size", value: "size" },
+      { text: "", value:"control", sortable: false,}
     ],
   }),
   methods: {
@@ -68,8 +75,51 @@ export default {
         return "mdi-file";
       }
     },
+    can_rerun(item) {
+        return item.has_recipe && item.status=="ready";
+    },
     open_item(item) {
       this.$emit("open-event", item);
+    },
+    updir() {
+      this.open_item({
+          key: this.dirkey.split("/").slice(0, -1).join("/"),
+          is_dir: true
+      });
+    },
+    remove_key(key){
+      this.info("Remove " + key);
+      var query = "";
+      if (key == "") {
+          console.log("Attempt to remove", key);
+          return;
+      } else {
+        query = this.url_remove_prefix + key;
+      }
+      console.log("Remove query", query);
+      this.$http.get(query).then(
+        function (response) {
+          response.json().then(
+            function (data) {
+              if (data.status == "OK") {
+                this.info("Removed "+key);
+                this.fetch_dir_status(this.dirkey);
+              } else {
+                this.error(data.message);
+                this.fetch_dir_status(this.dirkey);
+              }
+            }.bind(this),
+            function (reason) {
+              this.error("JSON error while removing "+key, reason, query);
+              this.fetch_dir_status(this.dirkey);
+            }.bind(this)
+          );
+        }.bind(this),
+        function (reason) {
+          this.error("Failed to remove "+key, reason, query);
+          this.fetch_dir_status(this.dirkey);
+        }.bind(this)
+      );
     },
     fetch_dir_status(key) {
       this.info("Fetching dir info " + key);

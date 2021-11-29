@@ -1,0 +1,4 @@
+RECIPES:
+  - query: harmonic/harmonic.parquet
+    title: Defaul harmonic table
+    description: Harmonic table with 100 rows

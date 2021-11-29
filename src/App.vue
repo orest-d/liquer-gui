@@ -151,7 +151,6 @@ export default {
       console.log("Updir from", this.dirkey);
       this.dirkey = this.dirkey.split("/").slice(0, -1).join("/");
       console.log("Updir to", this.dirkey);
-      this.fetch_dir_status(this.dirkey);
     },
 
     load_cache_metadata(query = null, callback = () => {}) {

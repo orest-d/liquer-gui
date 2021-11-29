@@ -8,12 +8,15 @@ import pandas as pd
 import numpy as np
 import liquer.ext.basic
 import liquer.ext.meta
+from liquer.context import RecipeSpecStore
 import liquer.ext.lq_pandas # Add pandas support to liquer so that the dataframe conversions work
 import liquer_pcv
-from liquer.store import web_mount_folder
+from liquer.store import web_mount, mount, FileStore
 from liquer.cache import set_cache, MemoryCache
 
-web_mount_folder("gui","dist/liquer/web/gui")
+web_mount("gui","dist/liquer/web/gui")
+mount("data", RecipeSpecStore(FileStore("liquer-gui/examples/data")))
+
 ### Create Flask app and register LiQuer blueprint
 from flask import Flask
 import liquer.server.blueprint as bp

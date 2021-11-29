@@ -1,7 +1,7 @@
 <template>
-  <v-chip :color="color" dark class="ma-2"
-      small outlined>
-    <v-icon>{{icon}}</v-icon>{{status}}
+  <v-chip :color="color" dark class="ma-2" v-if="show_status"
+      outlined>
+    <v-icon left>{{icon}}</v-icon>{{status}}
   </v-chip>
 </template>
 
@@ -11,7 +11,6 @@ export default {
   data: () => ({
     table: {
       none: {color: 'gray', icon:'mdi-help-circle'},
-      null: {color: 'gray', icon:'mdi-help-circle'},
       submitted: {color: 'blue', icon:'mdi-clock-outline'},
       parent: {color: 'yellow', icon:'mdi-pinwheel-outline'},
       evaluation: {color: 'yellow', icon:'mdi-pinwheel'},
@@ -24,6 +23,15 @@ export default {
     },
   }),
   computed: {
+    show_status() {
+        try{
+            this.table[this.status].color;
+            return true;
+        }
+        catch(e) {
+            return false;
+        }
+    },
     color() {
         try{
             return this.table[this.status].color;
