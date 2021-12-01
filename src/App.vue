@@ -100,6 +100,7 @@ export default {
     drawer: false,
     mode: "",
     query: "",
+    is_key: false,
     data: null,
     dirkey: "",
     metadata: null,
@@ -108,6 +109,7 @@ export default {
     message_event_object: { status: "OK" },
     url_query_prefix: "/liquer/q/",
     url_submit_prefix: "/liquer/submit/",
+    url_submit_key_prefix: "/liquer/submit/-R/",
     url_remove_prefix: "/liquer/cache/remove/",
     url_cache_meta_prefix: "/liquer/cache/meta/",
 
@@ -140,7 +142,10 @@ export default {
       }
       else{
         this.mode="content";
-        this.submit_query(item.key+"/-/dr");
+        this.query="";
+        this.key=item.key;
+        this.is_query=false;
+        this.submit_query(item.key, true);
       }
     },
     set_mode(mode){
@@ -233,17 +238,32 @@ export default {
         }.bind(this)
       );
     },
-    submit_query(query) {
+    submit_query(query, is_key=false) {
       console.log("Submit query", query);
       this.query = query;
-      this.info("Submitting query", {}, query);
-      this.$http.get(this.url_submit_prefix + query).then(
+      this.is_key=is_key;
+
+      var url=""
+      if (is_key) {
+          this.info("Submitting key", {}, query);
+          url = this.url_submit_key_prefix + query;
+          console.log("Submitting key, url:",url);
+      }
+      else{          
+          this.info("Submitting query", {}, query);
+          url = this.url_submit_prefix + query;
+          console.log("Submitting query, url:",url);
+      }
+      this.$http.get(url).then(
         function (response) {
           response.json().then(
             function (data) {
               try {
                 if (data.status == "OK") {
                   this.info(data.message, data, query);
+                  if (is_key){
+                      query = "-R/"+query+"/-/dr";
+                  }
                   this.monitor_query(
                     query,
                     function () {
@@ -272,6 +292,8 @@ export default {
         }.bind(this)
       );
     },
+
+
     split_query(query) {
       var query_basis = query;
       var q = this.query.split("/").filter(function (x) {
