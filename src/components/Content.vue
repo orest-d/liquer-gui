@@ -1,7 +1,14 @@
 <template>
   <v-container class="fill-height" fluid>
     <v-row v-if="mode == 'none'">
-      <v-col cols="5" />
+      <v-col>
+          <MetadataView :metadata="metadata"/>
+      </v-col>
+    <v-row>
+    <v-row v-if="mode == 'none'">
+      <v-col cols="5">
+          <MetadataView :metadata="metadata"/>
+      </v-col>
       <v-col cols="2">
         <v-progress-circular
           :size="150"
@@ -16,6 +23,7 @@
       <v-col>
         Query {{ metadata.query }} failed.
         <p>{{ metadata.message }}</p>
+        <MetadataView :metadata="metadata"/>
       </v-col>
     </v-row>
     <v-row v-if="mode == 'invalid'">
@@ -28,7 +36,10 @@
       </v-col>
     </v-row>
     <div v-if="mode == 'text'">
-      {{ data }}
+      <pre>{{ data }}</pre>
+    </div>
+    <div v-if="mode == 'html'">
+      <iframe width="100%" height="100%" :src="external_link" frameBorder="0"></iframe>
     </div>
     <v-layout row wrap v-if="mode == 'dataframe'">
       <v-flex>Pandas version: {{ data.schema.pandas_version }}
@@ -47,7 +58,12 @@
 </template>
 
 <script>
+import MetadataView from "./MetadataView";
+
 export default {
+  components: {
+    MetadataView,
+  },
   props: {
     liquer_url: {
       type: String,
@@ -97,6 +113,9 @@ export default {
             this.just_load("text");
           },
           text() {
+            if (this.metadata.mime =="test/html"){
+                this.just_load("html");
+            }
             this.just_load("text");
           },
           dataframe() {
