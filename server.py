@@ -8,7 +8,7 @@ import pandas as pd
 import numpy as np
 import liquer.ext.basic
 import liquer.ext.meta
-from liquer.context import RecipeSpecStore
+from liquer.recipes import RecipeSpecStore
 import liquer.ext.lq_pandas # Add pandas support to liquer so that the dataframe conversions work
 import liquer_pcv
 from liquer.store import web_mount, mount, FileStore

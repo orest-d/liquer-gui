@@ -52,6 +52,9 @@
     <v-app-bar app dense>
       <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
       <v-toolbar-title>LiQuer</v-toolbar-title>
+      <v-spacer></v-spacer>
+      <v-btn v-if="mode=='content'" @click="mode='metadata'">Metadata</v-btn>
+      <v-btn v-if="mode=='metadata'" @click="mode='content'">Content</v-btn>
     </v-app-bar>
     <v-main>
       <!--  -->
@@ -66,6 +69,11 @@
 
       <Content
         v-if="mode == 'content'"
+        :metadata="metadata"
+        @message-event="message_event($event)"
+      />
+      <MetadataView
+        v-if="mode == 'metadata'"
         :metadata="metadata"
         @message-event="message_event($event)"
       />
@@ -84,6 +92,7 @@
 import StatusBar from "./components/StatusBar";
 import Commands from "./components/Commands";
 import Content from "./components/Content";
+import MetadataView from "./components/MetadataView";
 import DirView from "./components/DirView";
 
 export default {
@@ -94,6 +103,7 @@ export default {
     Commands,
     Content,
     DirView,
+    MetadataView
   },
 
   data: () => ({
@@ -111,7 +121,7 @@ export default {
     url_submit_prefix: "/liquer/submit/",
     url_submit_key_prefix: "/liquer/submit/-R/",
     url_remove_prefix: "/liquer/cache/remove/",
-    url_cache_meta_prefix: "/liquer/cache/meta/",
+    url_stored_meta_prefix: "/liquer/api/stored_metadata/",
 
     liquer_url: "/liquer",
     html: "",
@@ -158,12 +168,12 @@ export default {
       console.log("Updir to", this.dirkey);
     },
 
-    load_cache_metadata(query = null, callback = () => {}) {
+    load_stored_metadata(query = null, callback = () => {}) {
       if (query == null) {
         query = this.query;
       }
-      console.log("Load cache metadata", query);
-      this.$http.get(this.url_cache_meta_prefix + query).then(
+      console.log("Load stored metadata", query);
+      this.$http.get(this.url_stored_meta_prefix + query).then(
         function (response) {
           response.json().then(
             function (data) {
@@ -172,7 +182,7 @@ export default {
             }.bind(this),
             function (reason) {
               this.error(
-                "JSON error while loading metadata from cache",
+                "JSON error while loading stored metadata",
                 reason,
                 query
               );
@@ -180,7 +190,7 @@ export default {
           );
         }.bind(this),
         function (reason) {
-          this.error("Failed loading metadata from cache", reason, query);
+          this.error("Failed loading stored metadata", reason, query);
         }.bind(this)
       );
     },
@@ -216,7 +226,7 @@ export default {
         query = this.query;
       }
       console.log("Monitor query", query);
-      this.load_cache_metadata(
+      this.load_stored_metadata(
         query,
         function () {
           if (this.metadata == null) {
@@ -228,6 +238,18 @@ export default {
             this.error("Query failed", this.metadata, query);
           } else if (this.metadata.status == "ready") {
             this.info("Data is ready", this.metadata, query);
+            callback();
+          } else if (this.metadata.status == "recipe") {
+            this.info("Recipe", this.metadata, query);
+            callback();
+          } else if (this.metadata.status == "external") {
+            this.info("External data is ready", this.metadata, query);
+            callback();
+          } else if (this.metadata.status == "expired") {
+            this.info("Data is available, but expired", this.metadata, query);
+            callback();
+          } else if (this.metadata.status == "side-effect") {
+            this.info("Data is ready (side-effect)", this.metadata, query);
             callback();
           } else {
             console.log("Status", this.metadata.status);
@@ -262,7 +284,7 @@ export default {
                 if (data.status == "OK") {
                   this.info(data.message, data, query);
                   if (is_key){
-                      query = "-R/"+query+"/-/dr";
+                      query = "-R/"+query;
                   }
                   this.monitor_query(
                     query,

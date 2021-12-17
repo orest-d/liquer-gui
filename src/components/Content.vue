@@ -1,39 +1,43 @@
 <template>
   <v-container class="fill-height" fluid>
-    <v-row v-if="mode == 'none'">
-      <v-col>
-          <MetadataView :metadata="metadata"/>
+    <v-row v-if="(mode == 'none') || (mode == 'waiting')">
+      <v-col cols="8">
+        <h4 v-if="mode == 'none'">No metadata</h4>
+        <h4 v-if="mode == 'waiting'">Waiting for {{ metadata.query }}</h4>
       </v-col>
-    <v-row>
-    <v-row v-if="mode == 'none'">
-      <v-col cols="5">
-          <MetadataView :metadata="metadata"/>
-      </v-col>
-      <v-col cols="2">
+      <v-col cols="4">
         <v-progress-circular
-          :size="150"
-          :width="20"
+          :size="50"
+          :width="10"
           color="primary"
           indeterminate
         ></v-progress-circular>
       </v-col>
-      <v-col cols="5" />
+    </v-row>
+    <v-row v-if="mode == 'none'">
+      <v-col>
+          <MetadataView :metadata="metadata" @message-event="message_event($event)"/>
+      </v-col>
+    </v-row>
+    <v-row v-if="mode == 'recipe'">
+      <v-col>
+          <MetadataView :metadata="metadata" @message-event="message_event($event)"/>
+      </v-col>
+    </v-row>
+    <v-row v-if="mode == 'waiting'">
+      <v-col>
+          <MetadataView :metadata="metadata" @message-event="message_event($event)"/>
+      </v-col>
     </v-row>
     <v-row v-if="mode == 'error'">
       <v-col>
         Query {{ metadata.query }} failed.
         <p>{{ metadata.message }}</p>
-        <MetadataView :metadata="metadata"/>
+        <MetadataView :metadata="metadata" @message-event="message_event($event)"/>
       </v-col>
     </v-row>
     <v-row v-if="mode == 'invalid'">
       <v-col> Invalid metadata </v-col>
-    </v-row>
-    <v-row v-if="mode == 'waiting'">
-      <v-col>
-        Waiting for {{ metadata.query }}.
-        <p>{{ metadata.message }}</p>
-      </v-col>
     </v-row>
     <div v-if="mode == 'text'">
       <pre>{{ data }}</pre>
@@ -104,7 +108,21 @@ export default {
       if (this.metadata.status == "error") {
         this.mode = "error";
       }
-      if (this.metadata.status == "ready") {
+      if (this.metadata.status == "recipe") {
+        this.mode = "recipe";
+      }
+      if ((this.metadata.status == "evaluation")
+          ||(this.metadata.status == "parent")
+          ||(this.metadata.status == "dependencies")
+          ||(this.metadata.status == "submitted")
+          ) {
+        this.mode = "waiting";
+      }
+      if ((this.metadata.status == "ready")
+          ||(this.metadata.status == "external")
+          ||(this.metadata.status == "expired")
+          ||(this.metadata.status == "side-effect")
+          ) {
         console.log("READY");
         console.log("Query", this.metadata.query);
         console.log("Type", this.metadata.type_identifier);
@@ -122,13 +140,27 @@ export default {
             this.just_load_json("dataframe", this.metadata.query+"/head_df-1000/data.json"); // FIXME: Handle filename
           },
         };
-        type_actions[this.metadata.type_identifier].bind(this)();
+        try{
+            type_actions[this.metadata.type_identifier].bind(this)();
+        }
+        catch(e) {
+            if (!(this.metadata.type_identifier in type_actions)){
+                this.error("Undefined data type: "+this.metadata.type_identifier);
+            }
+            else{
+                this.error("Error dispatching content");
+            }
+            console.log(e.stack);
+        }
       }
       return "waiting";
     },
     just_load(mode, query = null) {
       if (query == null) {
         query = this.metadata.query;
+      }
+      if (query == null) {
+        query = "-R/"+this.metadata.key;
       }
       console.log("Just load", query);
       this.$http.get(this.url_query_prefix + query).then(
@@ -152,6 +184,7 @@ export default {
             function (data) {
               this.data = data;
               this.info("Data loaded.");
+              console.log("Mode:",mode);
               this.mode = mode;
             }.bind(this),
             function (reason) {
@@ -167,8 +200,13 @@ export default {
   },
   watch: {
     metadata() {
+      console.log("Metadata updated in content");
       this.update();
     },
+  },
+  created(){
+      console.log("Content created");
+      this.update();
   },
   computed: {
     pcv_query(){
