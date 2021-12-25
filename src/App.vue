@@ -174,6 +174,10 @@ export default {
           self.set_mode("store");
         },
         q(self, argument) {
+          self.set_mode("content");
+          self.submit_query(argument);
+        },
+        m(self, argument) {
           self.set_mode("metadata");
           self.submit_query(argument);
         },
