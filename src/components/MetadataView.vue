@@ -18,11 +18,20 @@
         </v-expansion-panel-content>
       </v-expansion-panel>
       <v-expansion-panel>
+        <v-expansion-panel-header>Progress</v-expansion-panel-header>
+        <v-expansion-panel-content>
+            <div v-html="metadata.html_preview"></div>
+            <div>{{metadata.message}}</div>
+            <ProgressIndicator v-for="item in metadata.progress_indicators" :item="item" color="primary"/>
+            <ProgressIndicator v-for="item in metadata.child_progress_indicators" :item="item" color="secondary"/>
+        </v-expansion-panel-content>
+      </v-expansion-panel>
+      <v-expansion-panel>
         <v-expansion-panel-header>Info</v-expansion-panel-header>
         <v-expansion-panel-content>
           <v-simple-table>
             <tbody>
-              <tr><th colspan="2">Basic data</th></tr>
+              <tr><th colspan="2" deep-purple darken-4>Basic data</th></tr>
               <tr><td>Query</td><td>{{query}}</td></tr>
               <tr><td>Key</td><td>{{key}}</td></tr>
               <tr><td>Parent query</td><td>{{metadata.parent_query}}</td></tr>
@@ -31,11 +40,11 @@
               <tr><td>Started</td><td>{{metadata.started}}</td></tr>
               <tr><td>Updated</td><td>{{metadata.updated}}</td></tr>
               <tr><td>Created</td><td>{{metadata.created}}</td></tr>
-              <tr><th colspan="2">File Info</th></tr>
-              <tr><td>Name</td><td>{{metadata.fileinfo.name}}</td></tr>
+              <tr><th colspan="2" deep-purple darken-4>File Info</th></tr>
+              <tr><td>Name</td><td>{{fileinfo.name}}</td></tr>
               <tr><td>Extension</td><td>{{metadata.extension}}</td></tr>
-              <tr><td>File-system path</td><td>{{metadata.fileinfo.filesystem_path}}</td></tr>
-              <tr><td>MD5 checksum</td><td>{{metadata.fileinfo.md5}}</td></tr>
+              <tr><td>File-system path</td><td>{{fileinfo.filesystem_path}}</td></tr>
+              <tr><td>MD5 checksum</td><td>{{fileinfo.md5}}</td></tr>
               <tr><th colspan="2">Recipe</th></tr>
               <tr><td>Has recipe</td><td>{{metadata.has_recipe}}</td></tr>
               <tr><td>Recipes key</td><td>{{metadata.recipes_key}}</td></tr>
@@ -51,10 +60,11 @@
 
 <script>
 import ResultStatus from "./ResultStatus";
+import ProgressIndicator from "./ProgressIndicator";
 
 export default {
   components: {
-    ResultStatus,
+    ResultStatus, ProgressIndicator
   },
   props: {
     liquer_url: {
@@ -114,6 +124,23 @@ export default {
         return this.metadata.key;
       } catch {
         return "";
+      }
+    },
+    fileinfo() {
+        console.log("Get fileinfo");
+      try {
+        var f = this.metadata.fileinfo;
+        if (f==undefined || f==null) {
+            console.log("fileinfo undefined");
+            return {};
+        }
+        else{
+            console.log("fileinfo OK");
+            return f;
+        }
+      } catch {
+            console.log("fileinfo error");
+        return {};
       }
     },
     data_description() {

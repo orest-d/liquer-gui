@@ -1,5 +1,5 @@
 <template>
-    <v-footer padless>
+    <v-footer padless app>
         <v-col cols="1" style="padding:1px;">
             <v-chip v-if="status=='OK'" label color="gray" dark>
             {{status}}

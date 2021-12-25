@@ -84,7 +84,7 @@
         @message-event="message_event($event)"
       />
     </v-main>
-    <StatusBar :status="status" :message="message" />
+    <StatusBar :status="status" :message="message"/>
   </v-app>
 </template>
 
@@ -174,9 +174,11 @@ export default {
           self.set_mode("store");
         },
         q(self, argument) {
+          self.set_mode("metadata");
           self.submit_query(argument);
         },
         key(self, argument) {
+          self.set_mode("metadata");
           self.key = argument;
           self.submit_query(argument, true);
         },
@@ -191,6 +193,7 @@ export default {
           console.log("  Route instruction", instruction);
           console.log("  Route argument", argument);
           route_table[instruction](this, argument);
+          return;
         }
       }
       if (!recognized) {
