@@ -10,7 +10,7 @@
       <v-divider></v-divider>
 
       <v-list dense nav>
-        <v-list-item link @click="set_mode('content')">
+        <v-list-item link href="#-i-mode/content">
           <v-list-item-icon>
             <v-icon>mdi-eye</v-icon>
           </v-list-item-icon>
@@ -19,7 +19,7 @@
             <v-list-item-title>Content</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
-        <v-list-item link @click="set_mode('store')">
+        <v-list-item link href="#-i-mode/store">
           <v-list-item-icon>
             <v-icon>mdi-folder</v-icon>
           </v-list-item-icon>
@@ -28,7 +28,7 @@
             <v-list-item-title>Store</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
-        <v-list-item link @click="set_mode('commands')">
+        <v-list-item link href="#-i-mode/commands">
           <v-list-item-icon>
             <v-icon>mdi-view-list</v-icon>
           </v-list-item-icon>
@@ -53,8 +53,8 @@
       <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
       <v-toolbar-title>LiQuer</v-toolbar-title>
       <v-spacer></v-spacer>
-      <v-btn v-if="mode=='content'" @click="mode='metadata'">Metadata</v-btn>
-      <v-btn v-if="mode=='metadata'" @click="mode='content'">Content</v-btn>
+      <v-btn v-if="mode=='content'" href="#-i-mode/metadata">Metadata</v-btn>
+      <v-btn v-if="mode=='metadata'" href="#-i-mode/content">Content</v-btn>
     </v-app-bar>
     <v-main>
       <!--  -->
@@ -157,6 +157,37 @@ export default {
         this.is_query=false;
         this.submit_query(item.key, true);
       }
+    },
+    update_route() {
+        console.log("Update route", window.location.hash);
+        this.route = window.location.hash;
+        if (this.route.startsWith("#")){
+            this.route = this.route.substring(1);
+        }
+        var route_table={
+            mode(self, argument){
+                self.set_mode(argument);
+            },
+            store(self, argument){
+                self.dirkey = argument;
+                self.set_mode("store");
+            },
+        };
+        var recognized=false;
+        for (const instruction in route_table) {
+            var prefix = "-i-"+instruction+"/";
+            console.log("Try prefix", prefix);
+            if (this.route.startsWith(prefix)){
+                recognized = true;
+                var argument = this.route.substring(prefix.length);
+                console.log("  Route instruction",instruction);
+                console.log("  Route argument",argument);
+                route_table[instruction](this, argument);
+            }
+        }
+        if (!recognized) {
+            this.error("Route not recognized");
+        }
     },
     set_mode(mode){
       this.mode=mode;
@@ -354,6 +385,8 @@ export default {
 //    this.mode="content";
 //    this.submit_query("harmonic");
     this.mode="";
+    window.onhashchange = this.update_route
+    this.update_route();    
   },
 };
 </script>

@@ -22,13 +22,25 @@
         <v-expansion-panel-content>
           <v-simple-table>
             <tbody>
+              <tr><th colspan="2">Basic data</th></tr>
               <tr><td>Query</td><td>{{query}}</td></tr>
               <tr><td>Key</td><td>{{key}}</td></tr>
               <tr><td>Parent query</td><td>{{metadata.parent_query}}</td></tr>
               <tr><td>Type identifier</td><td>{{metadata.type_identifier}}</td></tr>
+              <tr><td>MIME type</td><td>{{metadata.mimetype}}</td></tr>
               <tr><td>Started</td><td>{{metadata.started}}</td></tr>
               <tr><td>Updated</td><td>{{metadata.updated}}</td></tr>
               <tr><td>Created</td><td>{{metadata.created}}</td></tr>
+              <tr><th colspan="2">File Info</th></tr>
+              <tr><td>Name</td><td>{{metadata.fileinfo.name}}</td></tr>
+              <tr><td>Extension</td><td>{{metadata.extension}}</td></tr>
+              <tr><td>File-system path</td><td>{{metadata.fileinfo.filesystem_path}}</td></tr>
+              <tr><td>MD5 checksum</td><td>{{metadata.fileinfo.md5}}</td></tr>
+              <tr><th colspan="2">Recipe</th></tr>
+              <tr><td>Has recipe</td><td>{{metadata.has_recipe}}</td></tr>
+              <tr><td>Recipes key</td><td>{{metadata.recipes_key}}</td></tr>
+              <tr><td>Recipes directory</td><td>{{metadata.recipes_directory}}</td></tr>
+              <tr><td>Is side-effect</td><td>{{metadata.side_effect}}</td></tr>
             </tbody>
           </v-simple-table>
         </v-expansion-panel-content>
