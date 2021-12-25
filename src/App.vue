@@ -53,8 +53,8 @@
       <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
       <v-toolbar-title>LiQuer</v-toolbar-title>
       <v-spacer></v-spacer>
-      <v-btn v-if="mode=='content'" href="#-i-mode/metadata">Metadata</v-btn>
-      <v-btn v-if="mode=='metadata'" href="#-i-mode/content">Content</v-btn>
+      <v-btn v-if="mode == 'content'" href="#-i-mode/metadata">Metadata</v-btn>
+      <v-btn v-if="mode == 'metadata'" href="#-i-mode/content">Content</v-btn>
     </v-app-bar>
     <v-main>
       <!--  -->
@@ -103,7 +103,7 @@ export default {
     Commands,
     Content,
     DirView,
-    MetadataView
+    MetadataView,
   },
 
   data: () => ({
@@ -149,54 +149,63 @@ export default {
       console.log("Open", item);
       if (item.is_dir) {
         this.dirkey = item.key;
-      }
-      else{
-        this.mode="content";
-        this.query="";
-        this.key=item.key;
-        this.is_query=false;
-        this.submit_query(item.key, true);
+        window.location.href = "#-i-store/" + this.dirkey;
+      } else {
+        this.mode = "content";
+        this.query = "";
+        this.key = item.key;
+        this.is_query = false;
+        window.location.href = "#-i-key/" + this.key;
+        //this.submit_query(item.key, true);
       }
     },
     update_route() {
-        console.log("Update route", window.location.hash);
-        this.route = window.location.hash;
-        if (this.route.startsWith("#")){
-            this.route = this.route.substring(1);
+      console.log("Update route", window.location.hash);
+      this.route = window.location.hash;
+      if (this.route.startsWith("#")) {
+        this.route = this.route.substring(1);
+      }
+      var route_table = {
+        mode(self, argument) {
+          self.set_mode(argument);
+        },
+        store(self, argument) {
+          self.dirkey = argument;
+          self.set_mode("store");
+        },
+        q(self, argument) {
+          self.submit_query(argument);
+        },
+        key(self, argument) {
+          self.key = argument;
+          self.submit_query(argument, true);
+        },
+      };
+      var recognized = false;
+      for (const instruction in route_table) {
+        var prefix = "-i-" + instruction + "/";
+        console.log("Try prefix", prefix);
+        if (this.route.startsWith(prefix)) {
+          recognized = true;
+          var argument = this.route.substring(prefix.length);
+          console.log("  Route instruction", instruction);
+          console.log("  Route argument", argument);
+          route_table[instruction](this, argument);
         }
-        var route_table={
-            mode(self, argument){
-                self.set_mode(argument);
-            },
-            store(self, argument){
-                self.dirkey = argument;
-                self.set_mode("store");
-            },
-        };
-        var recognized=false;
-        for (const instruction in route_table) {
-            var prefix = "-i-"+instruction+"/";
-            console.log("Try prefix", prefix);
-            if (this.route.startsWith(prefix)){
-                recognized = true;
-                var argument = this.route.substring(prefix.length);
-                console.log("  Route instruction",instruction);
-                console.log("  Route argument",argument);
-                route_table[instruction](this, argument);
-            }
-        }
-        if (!recognized) {
-            this.error("Route not recognized");
-        }
+      }
+      if (!recognized) {
+        this.error("Route not recognized");
+      }
     },
-    set_mode(mode){
-      this.mode=mode;
-      this.drawer=false;
+    set_mode(mode) {
+      this.mode = mode;
+      this.drawer = false;
     },
     updir() {
       console.log("Updir from", this.dirkey);
       this.dirkey = this.dirkey.split("/").slice(0, -1).join("/");
       console.log("Updir to", this.dirkey);
+      window.location.href = "#-i-store/" + this.dirkey;
     },
 
     load_stored_metadata(query = null, callback = () => {}) {
@@ -268,19 +277,23 @@ export default {
             console.log("Status", this.metadata.status);
             this.error("Query failed", this.metadata, query);
           } else if (this.metadata.status == "ready") {
-            this.info("Data is ready", this.metadata, query);
+            this.info("Data ready", this.metadata, query);
             callback();
           } else if (this.metadata.status == "recipe") {
             this.info("Recipe", this.metadata, query);
             callback();
           } else if (this.metadata.status == "external") {
-            this.info("External data is ready", this.metadata, query);
+            this.info("External data ready", this.metadata, query);
             callback();
           } else if (this.metadata.status == "expired") {
-            this.info("Data is available, but expired", this.metadata, query);
+            this.info("Expired data available", this.metadata, query);
             callback();
           } else if (this.metadata.status == "side-effect") {
-            this.info("Data is ready (side-effect)", this.metadata, query);
+            this.info(
+              "Data ready (created as a side-effect)",
+              this.metadata,
+              query
+            );
             callback();
           } else {
             console.log("Status", this.metadata.status);
@@ -291,21 +304,20 @@ export default {
         }.bind(this)
       );
     },
-    submit_query(query, is_key=false) {
+    submit_query(query, is_key = false) {
       console.log("Submit query", query);
       this.query = query;
-      this.is_key=is_key;
+      this.is_key = is_key;
 
-      var url=""
+      var url = "";
       if (is_key) {
-          this.info("Submitting key", {}, query);
-          url = this.url_submit_key_prefix + query;
-          console.log("Submitting key, url:",url);
-      }
-      else{          
-          this.info("Submitting query", {}, query);
-          url = this.url_submit_prefix + query;
-          console.log("Submitting query, url:",url);
+        this.info("Submitting key", {}, query);
+        url = this.url_submit_key_prefix + query;
+        console.log("Submitting key, url:", url);
+      } else {
+        this.info("Submitting query", {}, query);
+        url = this.url_submit_prefix + query;
+        console.log("Submitting query, url:", url);
       }
       this.$http.get(url).then(
         function (response) {
@@ -314,8 +326,8 @@ export default {
               try {
                 if (data.status == "OK") {
                   this.info(data.message, data, query);
-                  if (is_key){
-                      query = "-R/"+query;
+                  if (is_key) {
+                    query = "-R/" + query;
                   }
                   this.monitor_query(
                     query,
@@ -345,7 +357,6 @@ export default {
         }.bind(this)
       );
     },
-
 
     split_query(query) {
       var query_basis = query;
@@ -382,11 +393,11 @@ export default {
   },
   computed: {},
   created() {
-//    this.mode="content";
-//    this.submit_query("harmonic");
-    this.mode="";
-    window.onhashchange = this.update_route
-    this.update_route();    
+    //    this.mode="content";
+    //    this.submit_query("harmonic");
+    this.mode = "";
+    window.onhashchange = this.update_route;
+    this.update_route();
   },
 };
 </script>
