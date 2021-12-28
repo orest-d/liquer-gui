@@ -46,9 +46,9 @@
               :item="item"
               :key="index"
             />
-          </v-container fluid>
+          </v-container>
           <h3>Child Log</h3>
-          <v-container>
+          <v-container fluid>
             <LogEntry
               v-for="(item, index) in metadata.child_log"
               :item="item"
@@ -65,7 +65,7 @@
             <tbody>
               <tr>
                 <td>Query</td>
-                <td>{{ query }}</td>
+                <td><a :href="'#-i-qm/'+query">{{ query }}</a></td>
               </tr>
               <tr>
                 <td>Key</td>
@@ -73,7 +73,7 @@
               </tr>
               <tr>
                 <td>Parent query</td>
-                <td>{{ metadata.parent_query }}</td>
+                <td><a :href="'#-i-qm/'+metadata.parent_query">{{ metadata.parent_query }}</a></td>
               </tr>
               <tr>
                 <td>Type identifier</td>
@@ -130,7 +130,7 @@
               </tr>
               <tr>
                 <td>Recipes key</td>
-                <td>{{ metadata.recipes_key }}</td>
+                <td><a :href="'#-i-k/'+metadata.recipes_key">{{ metadata.recipes_key }}</a></td>
               </tr>
               <tr>
                 <td>Recipes directory</td>

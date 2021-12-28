@@ -52,7 +52,7 @@ export default {
           this.item.origin != null &&
           this.item.origin != ""
         ) {
-          return "#-i-m/" + this.item.origin;
+          return "#-i-qm/" + this.item.origin;
         } else {
           return "#-i-mode/metadata";
         }

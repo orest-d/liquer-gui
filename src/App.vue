@@ -37,6 +37,14 @@
             <v-list-item-title>Commands</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
+        <v-list-item link href="#-i-mode/clean">
+          <v-list-item-icon>
+            <v-icon>mdi-delete</v-icon>
+          </v-list-item-icon>
+          <v-list-item-content>
+            <v-list-item-title>Clean</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
         <v-divider></v-divider>
         <v-list-item link href="https://github.com/orest-d/liquer">
           <v-list-item-icon>
@@ -60,6 +68,11 @@
       <!--  -->
 
       <v-btn v-if="mode == 'store'" @click="updir()">Up</v-btn>
+      <Clean
+        v-if="mode == 'clean'"
+        @message-event="message_event($event)"
+      />
+
       <DirView
         v-if="mode == 'store'"
         :dirkey="dirkey"
@@ -94,6 +107,7 @@ import Commands from "./components/Commands";
 import Content from "./components/Content";
 import MetadataView from "./components/MetadataView";
 import DirView from "./components/DirView";
+import Clean from "./components/Clean";
 
 export default {
   name: "App",
@@ -104,6 +118,7 @@ export default {
     Content,
     DirView,
     MetadataView,
+    Clean,
   },
 
   data: () => ({
@@ -155,7 +170,7 @@ export default {
         this.query = "";
         this.key = item.key;
         this.is_query = false;
-        window.location.href = "#-i-key/" + this.key;
+        window.location.href = "#-i-k/" + this.key;
         //this.submit_query(item.key, true);
       }
     },
@@ -177,14 +192,19 @@ export default {
           self.set_mode("content");
           self.submit_query(argument);
         },
-        m(self, argument) {
+        qm(self, argument) {
           self.set_mode("metadata");
           self.submit_query(argument);
         },
-        key(self, argument) {
-          self.set_mode("metadata");
+        k(self, argument) {
+            self.set_mode("content");
           self.key = argument;
           self.submit_query(argument, true);
+        },
+        km(self, argument) {
+            self.set_mode("metadata");
+            self.key = argument;
+            self.submit_query(argument, true);
         },
       };
       var recognized = false;

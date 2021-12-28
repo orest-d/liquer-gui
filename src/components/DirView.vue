@@ -10,7 +10,10 @@
       <span @click="open_item(item)">{{ item.name }}</span>
     </template>
     <template v-slot:item.control="{ item }">
-        <v-btn v-if="can_rerun(item)" @click="remove_key(item.key)">
+        <v-btn :href="'#-i-km/'+item.key" icon>
+            <v-icon>mdi-information</v-icon>
+        </v-btn>
+        <v-btn v-if="can_rerun(item)" @click="remove_key(item.key)" icon>
             <v-icon>mdi-autorenew</v-icon>
         </v-btn>
     </template>
