@@ -20,7 +20,7 @@
       class="elevation-1"
     >
       <template v-slot:item.name="{ item }">
-        <a :href="'#ns-meta/help-' + item.name + '-' + item.ns">{{
+        <a :href="'#-i-q/ns-meta/help-' + item.name + '-' + item.ns">{{
           item.name
         }}</a>
       </template>

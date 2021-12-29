@@ -14,7 +14,7 @@
             <v-icon>mdi-information</v-icon>
         </v-btn>
         <v-btn v-if="can_rerun(item)" @click="remove_key(item.key)" icon>
-            <v-icon>mdi-autorenew</v-icon>
+            <v-icon>mdi-delete</v-icon>
         </v-btn>
     </template>
   </v-data-table>
@@ -36,6 +36,9 @@ export default {
     dirkey: {
       type: String,
       default: "",
+    },
+    tick: {
+      default: 0,
     },
   },
   data: () => ({
@@ -167,6 +170,9 @@ export default {
       if (new_dirkey != old_dirkey) {
         this.fetch_dir_status(new_dirkey);
       }
+    },
+    tick() {
+      this.fetch_dir_status(this.dirkey);
     },
   },
   created() {

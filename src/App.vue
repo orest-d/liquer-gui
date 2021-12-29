@@ -66,16 +66,34 @@
     </v-app-bar>
     <v-main>
       <!--  -->
+      <v-container v-if="mode == 'store'" fluid>
+        <v-row>
+          <v-col cols="1">
+            <v-btn @click="updir()" icon
+              ><v-icon>mdi-arrow-up-thin-circle-outline</v-icon></v-btn
+            >
+            <v-btn @click="tick+=1" icon>
+              <v-icon>mdi-autorenew</v-icon>
+            </v-btn>
+          </v-col>
+          <v-col cols="10"></v-col>
+          <v-col cols="1">
+            <v-btn @click="make_dir()" icon>
+              <v-icon>mdi-play-box-outline</v-icon>
+            </v-btn>
+            <v-btn @click="clean_dir()" icon>
+              <v-icon>mdi-delete</v-icon>
+            </v-btn>
+          </v-col>
+        </v-row>
+      </v-container>
 
-      <v-btn v-if="mode == 'store'" @click="updir()">Up</v-btn>
-      <Clean
-        v-if="mode == 'clean'"
-        @message-event="message_event($event)"
-      />
+      <Clean v-if="mode == 'clean'" @message-event="message_event($event)" />
 
       <DirView
         v-if="mode == 'store'"
         :dirkey="dirkey"
+        :tick="tick"
         @message-event="message_event($event)"
         @open-event="open_event($event)"
       />
@@ -97,7 +115,7 @@
         @message-event="message_event($event)"
       />
     </v-main>
-    <StatusBar :status="status" :message="message"/>
+    <StatusBar :status="status" :message="message" />
   </v-app>
 </template>
 
@@ -128,6 +146,7 @@ export default {
     is_key: false,
     data: null,
     dirkey: "",
+    tick:0,
     metadata: null,
     status: "OK",
     message: "",
@@ -197,14 +216,14 @@ export default {
           self.submit_query(argument);
         },
         k(self, argument) {
-            self.set_mode("content");
+          self.set_mode("content");
           self.key = argument;
           self.submit_query(argument, true);
         },
         km(self, argument) {
-            self.set_mode("metadata");
-            self.key = argument;
-            self.submit_query(argument, true);
+          self.set_mode("metadata");
+          self.key = argument;
+          self.submit_query(argument, true);
         },
       };
       var recognized = false;
@@ -233,6 +252,68 @@ export default {
       this.dirkey = this.dirkey.split("/").slice(0, -1).join("/");
       console.log("Updir to", this.dirkey);
       window.location.href = "#-i-store/" + this.dirkey;
+    },
+    clean_dir() {
+      console.log("Clean dir", this.dirkey);
+      var url = this.url_query_prefix;
+      if (this.dirkey == "") {
+        url = url + "ns-meta/root_key/clean-t-t-t-t-f/result.json";
+      } else {
+        url =
+          url +
+          "-R-meta/" +
+          this.dirkey +
+          "/-/ns-meta/clean-t-t-t-t-f/result.json";
+      }
+      console.log("Clean URL", url);
+      this.$http.get(url).then(
+        function (response) {
+          response.json().then(
+            function (data) {
+              console.log("clean result: ", data);
+              this.tick+=1;
+            }.bind(this),
+            function (reason) {
+              this.error("JSON error while cleaning " + this.dirkey, reason);
+              this.tick+=1;
+            }.bind(this)
+          );
+        }.bind(this),
+        function (reason) {
+          this.error("Failed calling clean " + this.dirkey, reason);
+        }.bind(this)
+      );
+    },
+    make_dir() {
+      console.log("make dir", this.dirkey);
+      var url = this.url_query_prefix;
+      if (this.dirkey == "") {
+        url = url + "ns-meta/root_key/make_recipes-f/result.json";
+      } else {
+        url =
+          url +
+          "-R-meta/" +
+          this.dirkey +
+          "/-/ns-meta/make_recipes-f/result.json";
+      }
+      console.log("Make dir URL", url);
+      this.$http.get(url).then(
+        function (response) {
+          response.json().then(
+            function (data) {
+              console.log("Make dir result: ", data);
+              this.tick+=1;
+            }.bind(this),
+            function (reason) {
+              this.error("JSON error while make dir " + this.dirkey, reason);
+              this.tick+=1;
+            }.bind(this)
+          );
+        }.bind(this),
+        function (reason) {
+          this.error("Failed calling make_recipes " + this.dirkey, reason);
+        }.bind(this)
+      );
     },
 
     load_stored_metadata(query = null, callback = () => {}) {
@@ -305,9 +386,6 @@ export default {
             this.error("Query failed", this.metadata, query);
           } else if (this.metadata.status == "ready") {
             this.info("Data ready", this.metadata, query);
-            callback();
-          } else if (this.metadata.status == "recipe") {
-            this.info("Recipe", this.metadata, query);
             callback();
           } else if (this.metadata.status == "external") {
             this.info("External data ready", this.metadata, query);

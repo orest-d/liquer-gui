@@ -54,16 +54,17 @@
     <div v-if="mode == 'text'">
       <pre>{{ data }}</pre>
     </div>
-    <div v-if="mode == 'iframe'">
+    <div v-if="mode == 'iframe'" style="width:100%; height:100%;">
       <iframe
         width="100%"
         height="100%"
         :src="external_link"
         frameBorder="0"
+        style="background-color: white;"        
       ></iframe>
     </div>
     <div v-if="mode == 'image'">
-        <img :src="external_link" aspect-ratio="1"/>
+        <img :src="external_link" aspect-ratio="1" style="width:100%; height:100%;object-fit: scale-down;"/>
     </div>
     <v-layout row wrap v-if="mode == 'dataframe'">
       <v-flex
@@ -105,6 +106,7 @@ export default {
     mode: "none",
     data_ready: false,
     url_query_prefix: "/liquer/q/",
+    url_store_data_prefix: "/liquer/api/store/data/",
   }),
   methods: {
     info(message, reason = null, query = null) {
@@ -146,14 +148,15 @@ export default {
         console.log("READY");
         console.log("Query", this.metadata.query);
         console.log("Type", this.metadata.type_identifier);
+        console.log("Metadata", this.metadata);
         var type_actions = {
           generic() {
             this.just_load("text");
           },
           text() {
-            if (this.metadata.mime == "text/html") {
+            if (this.metadata.mimetype == "text/html") {
               this.mode = "iframe";
-            } else if (this.metadata.mime.startsWith("image/")) {
+            } else if (this.metadata.mimetype.startsWith("image/")) {
               this.mode = "image";
             } else {
               this.just_load("text");
@@ -172,9 +175,9 @@ export default {
         try {
           type_actions[this.metadata.type_identifier].bind(this)();
         } catch (e) {
-          if (this.metadata.mime.startsWith("text/")) {
+          if (this.metadata.mimetype.startsWith("text/")) {
             this.mode = "iframe";
-          } else if (this.metadata.mime.startsWith("image/")) {
+          } else if (this.metadata.mimetype.startsWith("image/")) {
             this.mode = "image";
           } else {
             if (!(this.metadata.type_identifier in type_actions)) {
@@ -258,7 +261,7 @@ export default {
     },
     external_link() {
       if (typeof this.metadata.key == "string") {
-        return this.url_query_prefix + "-R/" + this.metadata.key;
+        return this.url_store_data_prefix + this.metadata.key;
       } else {
         return this.url_query_prefix + this.metadata.query;
       }
