@@ -1,6 +1,6 @@
 <template>
   <v-container class="fill-height" fluid>
-    <v-row v-if="(mode == 'none') || (mode == 'waiting')">
+    <v-row v-if="mode == 'none' || mode == 'waiting'">
       <v-col cols="8">
         <h4 v-if="mode == 'none'">No metadata</h4>
         <h4 v-if="mode == 'waiting'">Waiting for {{ metadata.query }}</h4>
@@ -16,24 +16,36 @@
     </v-row>
     <v-row v-if="mode == 'none'">
       <v-col>
-          <MetadataView :metadata="metadata" @message-event="message_event($event)"/>
+        <MetadataView
+          :metadata="metadata"
+          @message-event="message_event($event)"
+        />
       </v-col>
     </v-row>
     <v-row v-if="mode == 'recipe'">
       <v-col>
-          <MetadataView :metadata="metadata" @message-event="message_event($event)"/>
+        <MetadataView
+          :metadata="metadata"
+          @message-event="message_event($event)"
+        />
       </v-col>
     </v-row>
     <v-row v-if="mode == 'waiting'">
       <v-col>
-          <MetadataView :metadata="metadata" @message-event="message_event($event)"/>
+        <MetadataView
+          :metadata="metadata"
+          @message-event="message_event($event)"
+        />
       </v-col>
     </v-row>
     <v-row v-if="mode == 'error'">
       <v-col>
         Query {{ metadata.query }} failed.
         <p>{{ metadata.message }}</p>
-        <MetadataView :metadata="metadata" @message-event="message_event($event)"/>
+        <MetadataView
+          :metadata="metadata"
+          @message-event="message_event($event)"
+        />
       </v-col>
     </v-row>
     <v-row v-if="mode == 'invalid'">
@@ -42,12 +54,21 @@
     <div v-if="mode == 'text'">
       <pre>{{ data }}</pre>
     </div>
-    <div v-if="mode == 'html'">
-      <iframe width="100%" height="100%" :src="external_link" frameBorder="0"></iframe>
+    <div v-if="mode == 'iframe'">
+      <iframe
+        width="100%"
+        height="100%"
+        :src="external_link"
+        frameBorder="0"
+      ></iframe>
+    </div>
+    <div v-if="mode == 'image'">
+        <img :src="external_link" aspect-ratio="1"/>
     </div>
     <v-layout row wrap v-if="mode == 'dataframe'">
-      <v-flex>Pandas version: {{ data.schema.pandas_version }}
-          <v-btn :href="pcv_query">PointCloud Viewer</v-btn>
+      <v-flex
+        >Pandas version: {{ data.schema.pandas_version }}
+        <v-btn :href="pcv_query">PointCloud Viewer</v-btn>
       </v-flex>
       <v-flex xs12 v-if="data != null">
         <v-data-table
@@ -84,9 +105,6 @@ export default {
     mode: "none",
     data_ready: false,
     url_query_prefix: "/liquer/q/",
-    url_submit_prefix: "/liquer/submit/",
-    url_remove_prefix: "/liquer/cache/remove/",
-    url_cache_meta_prefix: "/liquer/cache/meta/",
   }),
   methods: {
     info(message, reason = null, query = null) {
@@ -111,18 +129,20 @@ export default {
       if (this.metadata.status == "recipe") {
         this.mode = "recipe";
       }
-      if ((this.metadata.status == "evaluation")
-          ||(this.metadata.status == "parent")
-          ||(this.metadata.status == "dependencies")
-          ||(this.metadata.status == "submitted")
-          ) {
+      if (
+        this.metadata.status == "evaluation" ||
+        this.metadata.status == "parent" ||
+        this.metadata.status == "dependencies" ||
+        this.metadata.status == "submitted"
+      ) {
         this.mode = "waiting";
       }
-      if ((this.metadata.status == "ready")
-          ||(this.metadata.status == "external")
-          ||(this.metadata.status == "expired")
-          ||(this.metadata.status == "side-effect")
-          ) {
+      if (
+        this.metadata.status == "ready" ||
+        this.metadata.status == "external" ||
+        this.metadata.status == "expired" ||
+        this.metadata.status == "side-effect"
+      ) {
         console.log("READY");
         console.log("Query", this.metadata.query);
         console.log("Type", this.metadata.type_identifier);
@@ -131,26 +151,41 @@ export default {
             this.just_load("text");
           },
           text() {
-            if (this.metadata.mime =="test/html"){
-                this.just_load("html");
+            if (this.metadata.mime == "text/html") {
+              this.mode = "iframe";
+            } else if (this.metadata.mime.startsWith("image/")) {
+              this.mode = "image";
+            } else {
+              this.just_load("text");
             }
-            this.just_load("text");
           },
           dataframe() {
-            this.just_load_json("dataframe", this.metadata.query+"/head_df-1000/data.json"); // FIXME: Handle filename
+            this.just_load_json(
+              "dataframe",
+              this.metadata.query + "/head_df-1000/data.json"
+            ); // FIXME: Handle filename
+          },
+          matplotlibfigure() {
+            this.mode = "image";
           },
         };
-        try{
-            type_actions[this.metadata.type_identifier].bind(this)();
-        }
-        catch(e) {
-            if (!(this.metadata.type_identifier in type_actions)){
-                this.error("Undefined data type: "+this.metadata.type_identifier);
-            }
-            else{
-                this.error("Error dispatching content");
+        try {
+          type_actions[this.metadata.type_identifier].bind(this)();
+        } catch (e) {
+          if (this.metadata.mime.startsWith("text/")) {
+            this.mode = "iframe";
+          } else if (this.metadata.mime.startsWith("image/")) {
+            this.mode = "image";
+          } else {
+            if (!(this.metadata.type_identifier in type_actions)) {
+              this.error(
+                "Undefined data type: " + this.metadata.type_identifier
+              );
+            } else {
+              this.error("Error dispatching content");
             }
             console.log(e.stack);
+          }
         }
       }
       return "waiting";
@@ -160,7 +195,7 @@ export default {
         query = this.metadata.query;
       }
       if (query == null) {
-        query = "-R/"+this.metadata.key;
+        query = "-R/" + this.metadata.key;
       }
       console.log("Just load", query);
       this.$http.get(this.url_query_prefix + query).then(
@@ -177,6 +212,9 @@ export default {
       if (query == null) {
         query = this.metadata.query;
       }
+      if (query == null) {
+        query = "-R/" + this.metadata.key;
+      }
       console.log("Just load JSON", query);
       this.$http.get(this.url_query_prefix + query).then(
         function (response) {
@@ -184,7 +222,7 @@ export default {
             function (data) {
               this.data = data;
               this.info("Data loaded.");
-              console.log("Mode:",mode);
+              console.log("Mode:", mode);
               this.mode = mode;
             }.bind(this),
             function (reason) {
@@ -204,13 +242,26 @@ export default {
       this.update();
     },
   },
-  created(){
-      console.log("Content created");
-      this.update();
+  created() {
+    console.log("Content created");
+    this.update();
   },
   computed: {
-    pcv_query(){
-        return this.url_query_prefix+this.metadata.query+"/pointcloud-viewer.html"
+    pcv_query() {
+      if (typeof this.metadata.key == "string") {
+        return "#-i-q/-R/" + this.metadata.key + "/-/dr/pointcloud-viewer.html";
+        //return this.url_query_prefix + "-R/"+this.metadata.key+"/-/dr/pointcloud-viewer.html";
+      } else {
+        return "#-i-q/" + this.metadata.query + "/pointcloud-viewer.html";
+        //return this.url_query_prefix +this.metadata.query +"/pointcloud-viewer.html";
+      }
+    },
+    external_link() {
+      if (typeof this.metadata.key == "string") {
+        return this.url_query_prefix + "-R/" + this.metadata.key;
+      } else {
+        return this.url_query_prefix + this.metadata.query;
+      }
     },
     dataframe_headers: function () {
       if (this.data == null) {

@@ -3,9 +3,11 @@ import sys
 sys.path.append("../liquer")
 
 from liquer import *
+import liquer.ext.lq_matplotlib
 import pandas as pd
 import numpy as np
 from time import sleep
+
 
 @first_command(volatile=True)
 def hello():
