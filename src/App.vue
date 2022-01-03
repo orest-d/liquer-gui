@@ -61,6 +61,7 @@
       <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
       <v-toolbar-title>LiQuer</v-toolbar-title>
       <v-spacer></v-spacer>
+      <v-btn v-if="can_edit" href="#-i-mode/edit">Edit</v-btn>
       <v-btn v-if="mode == 'content'" href="#-i-mode/metadata">Metadata</v-btn>
       <v-btn v-if="mode == 'metadata'" href="#-i-mode/content">Content</v-btn>
     </v-app-bar>
@@ -114,6 +115,11 @@
         :liquer_url="liquer_url"
         @message-event="message_event($event)"
       />
+      <PlainTextStoreEditor
+        v-if="mode == 'edit'"
+        :metadata="metadata"
+        @message-event="message_event($event)"
+      />
     </v-main>
     <StatusBar :status="status" :message="message" />
   </v-app>
@@ -126,6 +132,7 @@ import Content from "./components/Content";
 import MetadataView from "./components/MetadataView";
 import DirView from "./components/DirView";
 import Clean from "./components/Clean";
+import PlainTextStoreEditor from "./components/PlainTextStoreEditor";
 
 export default {
   name: "App",
@@ -137,6 +144,7 @@ export default {
     DirView,
     MetadataView,
     Clean,
+    PlainTextStoreEditor
   },
 
   data: () => ({
@@ -240,7 +248,8 @@ export default {
         }
       }
       if (!recognized) {
-        this.error("Route not recognized");
+        //this.error("Route not recognized");
+        console.log("Route not recognized");
       }
     },
     set_mode(mode) {
@@ -496,7 +505,11 @@ export default {
       return query_basis;
     },
   },
-  computed: {},
+  computed: {
+      can_edit() {
+          return (this.mode=="content" || this.mode=="metadata");
+      }
+  },
   created() {
     //    this.mode="content";
     //    this.submit_query("harmonic");
