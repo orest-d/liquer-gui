@@ -41,6 +41,7 @@ bash buils_liquer_gui.sh
 
 # News
 
-- 2020-11-28 - v0.0.1  - initial release
-- 2020-11-28 - v0.0.2  - improving directory view
-- 2020-11-28 - v0.0.3  - fixes and remove data from recipes
+- 2021-11-28 - v0.0.1  - initial release
+- 2021-11-28 - v0.0.2  - improving directory view
+- 2021-11-28 - v0.0.3  - fixes and remove data from recipes
+- 2022-01-03 - v0.1.0  - many enhancements, first relatively usable release
