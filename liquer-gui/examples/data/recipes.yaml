@@ -6,3 +6,4 @@ RECIPES:
     title: Sinus chart in png format
   - query: data/harmonic.parquet/-/dr/mpl-xy-a-x/sin.svg
     title: Sinus chart in SVG format
+

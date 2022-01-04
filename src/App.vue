@@ -73,8 +73,8 @@
             <v-btn @click="updir()" icon
               ><v-icon>mdi-arrow-up-thin-circle-outline</v-icon></v-btn
             >
-            <v-btn @click="tick+=1" icon>
-              <v-icon>mdi-autorenew</v-icon>
+            <v-btn @click="sync()" icon>
+              <v-icon>mdi-sync</v-icon>
             </v-btn>
           </v-col>
           <v-col cols="10"></v-col>
@@ -375,6 +375,35 @@ export default {
         }.bind(this),
         function (reason) {
           this.error("Failed loading metadata", reason, query);
+        }.bind(this)
+      );
+    },
+    sync() {
+      
+      console.log("Sync");
+      var url =
+        this.url_query_prefix +
+        "sync_store/result.json";
+      console.log("GET", url);
+      this.$http.get(url).then(
+        function (response) {
+          response.json().then(
+            function (data) {
+                if (data.status == "OK"){
+                    this.info(data.message);
+                }
+                else{
+                    this.error(data.message);
+                }
+                this.tick+=1;
+            }.bind(this),
+            function (reason) {
+              this.error("JSON error while sync", reason);
+            }.bind(this)
+          );
+        }.bind(this),
+        function (reason) {
+          this.error("Failed to sync", reason);
         }.bind(this)
       );
     },
