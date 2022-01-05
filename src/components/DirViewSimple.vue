@@ -89,6 +89,7 @@ export default {
             function (data) {
               if (data.status == "OK") {
                 this.dir_status = data.data;
+                this.info("Dir info loaded");
               } else {
                 this.error(data.message);
               }

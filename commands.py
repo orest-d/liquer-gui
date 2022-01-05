@@ -3,6 +3,7 @@ import sys
 sys.path.append("../liquer")
 
 from liquer import *
+from liquer.context import get_context
 import liquer.ext.lq_matplotlib
 import pandas as pd
 import numpy as np
@@ -13,9 +14,16 @@ from time import sleep
 def hello():
     return "Hello"
 
+@first_command(volatile=True)
+def error(context=None):
+    context = get_context(context)
+    context.warning(f"This will raise an exception")
+    raise Exception("Test error")
 
 @first_command
-def harmonic(n=100):
+def harmonic(n=100, context=None):
+    context = get_context(context)
+    context.info(f"Create harmonic table with n={n}")
     a = np.linspace(0,2*np.pi,n)
     segment = np.array(a*10/(2*np.pi),dtype=int)
     return pd.DataFrame(

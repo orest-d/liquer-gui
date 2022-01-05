@@ -82,7 +82,7 @@ export default {
       }
     },
     can_rerun(item) {
-        return item.has_recipe && item.status=="ready";
+        return item.has_recipe && item.status!="recipe";
     },
     open_item(item) {
       this.$emit("open-event", item);
@@ -150,6 +150,7 @@ export default {
                 for (var i = 0; i < this.dir_status.length; i++) {
                   this.dir_status[i].icon = this.icon(this.dir_status[i]);
                 }
+                this.info("Dir info loaded");
               } else {
                 this.error(data.message);
               }

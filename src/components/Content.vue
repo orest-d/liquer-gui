@@ -54,6 +54,13 @@
     <div v-if="mode == 'text'">
       <pre>{{ data }}</pre>
     </div>
+    <div v-if="mode == 'link'">
+    <h3>{{ title }}</h3>
+    <em>{{ data_description }}</em>
+    <br />
+    <pre>{{ description }}</pre>
+      Content: <a :href="external_link"><v-icon>mdi-link</v-icon>{{external_link_description}}</a>
+    </div>
     <div v-if="mode == 'iframe'" style="width:100%; height:100%;">
       <iframe
         width="100%"
@@ -181,9 +188,10 @@ export default {
             this.mode = "image";
           } else {
             if (!(this.metadata.type_identifier in type_actions)) {
-              this.error(
+              this.info(
                 "Undefined data type: " + this.metadata.type_identifier
               );
+              this.mode="link";
             } else {
               this.error("Error dispatching content");
             }
@@ -250,6 +258,34 @@ export default {
     this.update();
   },
   computed: {
+    title() {
+      try {
+        return this.metadata.title;
+      } catch {
+        return "";
+      }
+    },
+    description() {
+      try {
+        return this.metadata.description;
+      } catch {
+        return "";
+      }
+    },
+    key() {
+      try {
+        return this.metadata.key;
+      } catch {
+        return "";
+      }
+    },
+    data_description() {
+      try {
+        return this.metadata.data_characteristics.description;
+      } catch {
+        return "";
+      }
+    },
     pcv_query() {
       if (typeof this.metadata.key == "string") {
         return "#-i-q/-R/" + this.metadata.key + "/-/dr/pointcloud-viewer.html";
@@ -264,6 +300,13 @@ export default {
         return this.url_store_data_prefix + this.metadata.key;
       } else {
         return this.url_query_prefix + this.metadata.query;
+      }
+    },
+    external_link_description() {
+      if (typeof this.metadata.key == "string") {
+        return this.metadata.key+" (key)";
+      } else {
+        return this.metadata.query+" (query)";
       }
     },
     dataframe_headers: function () {

@@ -77,7 +77,7 @@
               <v-icon>mdi-sync</v-icon>
             </v-btn>
           </v-col>
-          <v-col cols="10"></v-col>
+          <v-col cols="10">{{dirkey}}</v-col>
           <v-col cols="1">
             <v-btn @click="make_dir()" icon>
               <v-icon>mdi-play-box-outline</v-icon>
