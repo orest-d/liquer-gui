@@ -171,8 +171,7 @@ export default {
           },
           dataframe() {
             this.just_load_json(
-              "dataframe",
-              this.metadata.query + "/head_df-1000/data.json"
+              "dataframe", this.dataframe_head_query
             ); // FIXME: Handle filename
           },
           matplotlibfigure() {
@@ -193,7 +192,7 @@ export default {
               );
               this.mode="link";
             } else {
-              this.error("Error dispatching content");
+                this.error("Error dispatching content");
             }
             console.log(e.stack);
           }
@@ -202,14 +201,29 @@ export default {
       return "waiting";
     },
     just_load(mode, query = null) {
+      console.log("Just load", mode, query);
+      var url = null;
       if (query == null) {
-        query = this.metadata.query;
+          if (this.key!=""){
+              console.log("Using key",this.key);
+              url = this.url_store_data_prefix + this.key;
+          }
+          else{
+              if (this.metadata.query==undefined || this.metadata.query==null){
+                  this.error("Neither key nor query in metadata");
+              }
+              else{
+                  console.log("Using query",this.metadata.query);
+                  url=this.url_query_prefix + this.metadata.query;
+              }
+          }
       }
-      if (query == null) {
-        query = "-R/" + this.metadata.key;
+      else{
+        console.log("Using passed query",query);
+        url=this.url_query_prefix + query;
       }
-      console.log("Just load", query);
-      this.$http.get(this.url_query_prefix + query).then(
+      console.log("URL",url);
+      this.$http.get(url).then(
         function (response) {
           this.data = response.body;
           this.mode = mode;
@@ -220,14 +234,29 @@ export default {
       );
     },
     just_load_json(mode, query = null) {
+      console.log("Just load json", mode, query);
+      var url = null;
       if (query == null) {
-        query = this.metadata.query;
+          if (this.key!=""){
+              console.log("Using key",this.key);
+              url = this.url_store_data_prefix + this.key;
+          }
+          else{
+              if (this.metadata.query==undefined || this.metadata.query==null){
+                  this.error("Neither key nor query in metadata");
+              }
+              else{
+                  console.log("Using query",this.metadata.query);
+                  url=this.url_query_prefix + this.metadata.query;
+              }
+          }
       }
-      if (query == null) {
-        query = "-R/" + this.metadata.key;
+      else{
+        console.log("Using passed query",query);
+        url=this.url_query_prefix + query;
       }
-      console.log("Just load JSON", query);
-      this.$http.get(this.url_query_prefix + query).then(
+      console.log("URL",url);
+      this.$http.get(url).then(
         function (response) {
           response.json().then(
             function (data) {
@@ -300,6 +329,13 @@ export default {
         return this.url_store_data_prefix + this.metadata.key;
       } else {
         return this.url_query_prefix + this.metadata.query;
+      }
+    },
+    dataframe_head_query() {
+      if (typeof this.metadata.key == "string") {
+        return "-R/"+this.metadata.key+"/-/dr/head_df-1000/data.json";
+      } else {
+        return this.metadata.query + "/head_df-1000/data.json";
       }
     },
     external_link_description() {
