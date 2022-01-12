@@ -116,7 +116,12 @@
         @message-event="message_event($event)"
       />
       <PlainTextStoreEditor
-        v-if="mode == 'edit'"
+        v-if="show_plain_text_editor"
+        :metadata="metadata"
+        @message-event="message_event($event)"
+      />
+      <HighlightingTextStoreEditor
+        v-if="show_highlighting_text_editor"
         :metadata="metadata"
         @message-event="message_event($event)"
       />
@@ -133,6 +138,7 @@ import MetadataView from "./components/MetadataView";
 import DirView from "./components/DirView";
 import Clean from "./components/Clean";
 import PlainTextStoreEditor from "./components/PlainTextStoreEditor";
+import HighlightingTextStoreEditor from "./components/HighlightingTextStoreEditor";
 
 export default {
   name: "App",
@@ -144,7 +150,8 @@ export default {
     DirView,
     MetadataView,
     Clean,
-    PlainTextStoreEditor
+    PlainTextStoreEditor,
+    HighlightingTextStoreEditor
   },
 
   data: () => ({
@@ -196,7 +203,7 @@ export default {
         this.mode = "content";
         this.query = "";
         this.key = item.key;
-        this.is_query = false;
+        this.is_key = true;
         window.location.href = "#-i-k/" + this.key;
         //this.submit_query(item.key, true);
       }
@@ -210,6 +217,14 @@ export default {
       var route_table = {
         mode(self, argument) {
           self.set_mode(argument);
+          if (this.mode == "content"){
+              if (this.is_key){
+                  self.submit_query(this.key, true);
+              }
+              else{
+                  self.submit_query(this.query);
+              }
+          }
         },
         store(self, argument) {
           self.dirkey = argument;
@@ -224,14 +239,16 @@ export default {
           self.submit_query(argument);
         },
         k(self, argument) {
-          self.set_mode("content");
           self.key = argument;
+          self.is_key = true;
+          self.set_mode("content");
           self.submit_query(argument, true);
         },
         km(self, argument) {
-          self.set_mode("metadata");
           self.key = argument;
-          self.submit_query(argument, true);
+          self.is_key = true;
+          self.set_mode("metadata");
+          self.load_stored_metadata("-R/"+argument);
         },
       };
       var recognized = false;
@@ -537,6 +554,12 @@ export default {
   computed: {
       can_edit() {
           return (this.mode=="content" || this.mode=="metadata");
+      },
+      show_plain_text_editor(){
+          return this.mode=="edit" && (typeof this.key =="string") && (!this.key.endsWith(".yaml"));
+      },
+      show_highlighting_text_editor(){
+          return this.mode=="edit" && (typeof this.key =="string") && this.key.endsWith(".yaml");
       }
   },
   created() {

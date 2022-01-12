@@ -1,2 +1,2 @@
 flask>=1.0.2
-liquer-framework>=0.6.2
+liquer-framework>=0.7.5
