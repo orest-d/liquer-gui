@@ -133,6 +133,10 @@
                 <td><a :href="'#-i-k/'+metadata.recipes_key">{{ metadata.recipes_key }}</a></td>
               </tr>
               <tr>
+                <td>Recipe name</td>
+                <td>{{ metadata.recipe_name }}</td>
+              </tr>
+              <tr>
                 <td>Recipes directory</td>
                 <td>{{ metadata.recipes_directory }}</td>
               </tr>
