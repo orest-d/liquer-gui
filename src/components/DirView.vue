@@ -1,5 +1,5 @@
 <template>
-  <v-data-table :headers="headers" :items="dir_status" class="elevation-1">
+  <v-data-table :headers="headers" :items="dir_status" hide-default-footer class="elevation-1">
     <template v-slot:item.icon="{ item }">
       <v-icon v-text="item.icon" />
     </template>

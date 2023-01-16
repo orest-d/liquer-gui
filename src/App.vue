@@ -60,7 +60,61 @@
     <v-app-bar app dense>
       <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
       <v-toolbar-title>LiQuer</v-toolbar-title>
+      <v-menu
+        :rounded="rounded"
+        open-on-hover
+        offset-y
+        transition="slide-x-transition"
+        bottom
+        right
+      >
+        <template v-slot:activator="{ on, attrs }">
+          <v-btn v-bind="attrs" v-on="on"> Services </v-btn>
+        </template>
+        <v-list dense>
+          <v-list-item
+            v-for="(item, index) in services"
+            :key="index"
+            router
+            :to="item.link"
+          >
+            <v-list-item-action>
+              <v-list-item-title>{{ item.title }}</v-list-item-title>
+            </v-list-item-action>
+          </v-list-item>
+        </v-list>
+      </v-menu>
+
       <v-spacer></v-spacer>
+      <v-menu
+        open-on-hover
+        offset-y
+        transition="slide-x-transition"
+        bottom
+        right
+        v-if="mode == 'store'"
+      >
+        <template v-slot:activator="{ on, attrs }">
+          <v-btn text v-bind="attrs" v-on="on"> New </v-btn>
+        </template>
+        <v-list dense>
+          <v-list-item href="#-i-mode/new_file">
+            <v-list-item-action>
+              <v-list-item-title>New file</v-list-item-title>
+            </v-list-item-action>
+          </v-list-item>
+          <v-list-item href="#-i-mode/upload_file">
+            <v-list-item-action>
+              <v-list-item-title>Upload file</v-list-item-title>
+            </v-list-item-action>
+          </v-list-item>
+          <v-list-item href="#-i-mode/create_folder">
+            <v-list-item-action>
+              <v-list-item-title>Create folder</v-list-item-title>
+            </v-list-item-action>
+          </v-list-item>
+        </v-list>
+      </v-menu>
       <v-btn v-if="can_edit" href="#-i-mode/edit">Edit</v-btn>
       <v-btn v-if="mode == 'content'" href="#-i-mode/metadata">Metadata</v-btn>
       <v-btn v-if="mode == 'metadata'" href="#-i-mode/content">Content</v-btn>
@@ -77,7 +131,7 @@
               <v-icon>mdi-sync</v-icon>
             </v-btn>
           </v-col>
-          <v-col cols="10">{{dirkey}}</v-col>
+          <v-col cols="10">{{ dirkey }}</v-col>
           <v-col cols="1">
             <v-btn @click="make_dir()" icon>
               <v-icon>mdi-play-box-outline</v-icon>
@@ -125,6 +179,13 @@
         :metadata="metadata"
         @message-event="message_event($event)"
       />
+      <NewFile
+        v-if="mode == 'new_file'"
+        :dirkey="dirkey"
+        @message-event="message_event($event)"
+        @open-event="open_event($event)"
+      />
+
     </v-main>
     <StatusBar :status="status" :message="message" />
   </v-app>
@@ -139,6 +200,7 @@ import DirView from "./components/DirView";
 import Clean from "./components/Clean";
 import PlainTextStoreEditor from "./components/PlainTextStoreEditor";
 import HighlightingTextStoreEditor from "./components/HighlightingTextStoreEditor";
+import NewFile from "./components/NewFile";
 
 export default {
   name: "App",
@@ -151,7 +213,8 @@ export default {
     MetadataView,
     Clean,
     PlainTextStoreEditor,
-    HighlightingTextStoreEditor
+    HighlightingTextStoreEditor,
+    NewFile
   },
 
   data: () => ({
@@ -161,7 +224,7 @@ export default {
     is_key: false,
     data: null,
     dirkey: "",
-    tick:0,
+    tick: 0,
     metadata: null,
     status: "OK",
     message: "",
@@ -171,6 +234,24 @@ export default {
     url_submit_key_prefix: "/liquer/submit/-R/",
     url_remove_prefix: "/liquer/cache/remove/",
     url_stored_meta_prefix: "/liquer/api/stored_metadata/",
+
+
+        services: [{
+                icon: "mdi-domain",
+                title: "Media Monitoring",
+                link: "/mmrservices"
+            },
+            {
+                icon: "mdi-message-text",
+                title: "Audience Measurement",
+                link: "/amrservices"
+            },
+            {
+                icon: "mdi-flag",
+                title: "Integration Analysis"
+            }
+        ],
+
 
     liquer_url: "/liquer",
     html: "",
@@ -217,13 +298,12 @@ export default {
       var route_table = {
         mode(self, argument) {
           self.set_mode(argument);
-          if (this.mode == "content"){
-              if (this.is_key){
-                  self.submit_query(this.key, true);
-              }
-              else{
-                  self.submit_query(this.query);
-              }
+          if (this.mode == "content") {
+            if (this.is_key) {
+              self.submit_query(this.key, true);
+            } else {
+              self.submit_query(this.query);
+            }
           }
         },
         store(self, argument) {
@@ -248,7 +328,7 @@ export default {
           self.key = argument;
           self.is_key = true;
           self.set_mode("metadata");
-          self.load_stored_metadata("-R/"+argument);
+          self.load_stored_metadata("-R/" + argument);
         },
       };
       var recognized = false;
@@ -297,11 +377,11 @@ export default {
           response.json().then(
             function (data) {
               console.log("clean result: ", data);
-              this.tick+=1;
+              this.tick += 1;
             }.bind(this),
             function (reason) {
               this.error("JSON error while cleaning " + this.dirkey, reason);
-              this.tick+=1;
+              this.tick += 1;
             }.bind(this)
           );
         }.bind(this),
@@ -328,11 +408,11 @@ export default {
           response.json().then(
             function (data) {
               console.log("Make dir result: ", data);
-              this.tick+=1;
+              this.tick += 1;
             }.bind(this),
             function (reason) {
               this.error("JSON error while make dir " + this.dirkey, reason);
-              this.tick+=1;
+              this.tick += 1;
             }.bind(this)
           );
         }.bind(this),
@@ -396,23 +476,19 @@ export default {
       );
     },
     sync() {
-      
       console.log("Sync");
-      var url =
-        this.url_query_prefix +
-        "sync_store/result.json";
+      var url = this.url_query_prefix + "sync_store/result.json";
       console.log("GET", url);
       this.$http.get(url).then(
         function (response) {
           response.json().then(
             function (data) {
-                if (data.status == "OK"){
-                    this.info(data.message);
-                }
-                else{
-                    this.error(data.message);
-                }
-                this.tick+=1;
+              if (data.status == "OK") {
+                this.info(data.message);
+              } else {
+                this.error(data.message);
+              }
+              this.tick += 1;
             }.bind(this),
             function (reason) {
               this.error("JSON error while sync", reason);
@@ -552,15 +628,23 @@ export default {
     },
   },
   computed: {
-      can_edit() {
-          return (this.mode=="content" || this.mode=="metadata");
-      },
-      show_plain_text_editor(){
-          return this.mode=="edit" && (typeof this.key =="string") && (!this.key.endsWith(".yaml"));
-      },
-      show_highlighting_text_editor(){
-          return this.mode=="edit" && (typeof this.key =="string") && this.key.endsWith(".yaml");
-      }
+    can_edit() {
+      return this.mode == "content" || this.mode == "metadata";
+    },
+    show_plain_text_editor() {
+      return (
+        this.mode == "edit" &&
+        typeof this.key == "string" &&
+        !this.key.endsWith(".yaml")
+      );
+    },
+    show_highlighting_text_editor() {
+      return (
+        this.mode == "edit" &&
+        typeof this.key == "string" &&
+        this.key.endsWith(".yaml")
+      );
+    },
   },
   created() {
     //    this.mode="content";
