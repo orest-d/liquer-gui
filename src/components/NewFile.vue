@@ -122,7 +122,7 @@ export default {
       return {
         query: "-R/" + this.new_key,
         key: this.new_key,
-        status: "ready",
+        status: "external",
         type_identifier: "text",
         message: "Created by user",
         is_error: false,

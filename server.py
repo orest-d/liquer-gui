@@ -9,7 +9,7 @@ import liquer.ext.meta
 from liquer.recipes import RecipeSpecStore
 import liquer.ext.lq_pandas # Add pandas support to liquer so that the dataframe conversions work
 import liquer_pcv
-from liquer.store import web_mount, mount, FileStore
+from liquer.store import web_mount, mount, FileStore, get_store
 from liquer.cache import set_cache, MemoryCache
 import commands
 
@@ -40,4 +40,7 @@ def index():
 
 
 if __name__ == '__main__':
-    app.run()
+    query="data/hello.txt"
+#    get_store().store_metadata(query, {"title":"test"})
+#    print(get_store().get_metadata(query))
+    app.run(debug=True)
