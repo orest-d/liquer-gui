@@ -185,6 +185,12 @@
         @message-event="message_event($event)"
         @open-event="open_event($event)"
       />
+      <UploadFile
+        v-if="mode == 'upload_file'"
+        :dirkey="dirkey"
+        @message-event="message_event($event)"
+        @open-event="open_event($event)"
+      />
       <NewFolder
         v-if="mode == 'create_folder'"
         :dirkey="dirkey"
@@ -208,6 +214,7 @@ import PlainTextStoreEditor from "./components/PlainTextStoreEditor";
 import HighlightingTextStoreEditor from "./components/HighlightingTextStoreEditor";
 import NewFile from "./components/NewFile";
 import NewFolder from "./components/NewFolder";
+import UploadFile from "./components/UploadFile";
 
 export default {
   name: "App",
@@ -223,6 +230,7 @@ export default {
     HighlightingTextStoreEditor,
     NewFile,
     NewFolder,
+    UploadFile,
   },
 
   data: () => ({
