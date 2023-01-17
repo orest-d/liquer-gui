@@ -25,6 +25,10 @@
       <v-card-actions>
         <v-btn @click="create()">Create</v-btn>
         <v-btn href="#-i-mode/store">Cancel</v-btn>
+        <v-checkbox
+          v-model="allow_overwrite"
+          label="Allow overwrite"
+        ></v-checkbox>
       </v-card-actions>
     </v-card>
   </v-container>
@@ -48,6 +52,7 @@ export default {
     content: "",
     result_metadata: { status: "", message: "" },
     result_data: { status: "", message: "" },
+    allow_overwrite:false,
   }),
   methods: {
     info(message, reason = null, query = null) {
@@ -59,8 +64,39 @@ export default {
     message_event(m) {
       this.$emit("message-event", m);
     },
-    create() {
-      console.log("Create", this.file_name);
+    create(){
+        console.log("Create", this.file_name);
+        if (this.allow_overwrite) {
+            console.log("Allow overwrite", this.file_name);
+            this.do_create();
+        }
+        else{
+            this.$http.get(this.contains_url).then(
+                function (response) {
+                    response.json().then(
+                        function (data) {
+                            console.log("Contains result: ", data);
+                            var contains = data.contains;
+                            if (contains){
+                                this.error("Key "+this.new_key+" exists. Allow overwrite to proceed.")
+                            }
+                            else{
+                                this.do_create();
+                            }
+                        }.bind(this),
+                        function (reason) {
+                            this.error("JSON error while 'contains'", reason);
+                        }.bind(this)
+                    );
+                }.bind(this),
+                function (reason) {
+                    this.error("Failed calling 'contains'", reason);
+                }.bind(this)
+            );
+        }
+    },
+    do_create() {
+      console.log("Do create", this.file_name);
       this.$http.post(this.create_metadata_url, this.metadata).then(
         function (response) {
           response.json().then(
@@ -117,6 +153,9 @@ export default {
     },
     create_data_url() {
       return this.liquer_url + "/api/store/data/" + this.new_key;
+    },
+    contains_url() {
+      return this.liquer_url + "/api/store/contains/" + this.new_key;
     },
     metadata() {
       return {

@@ -185,6 +185,12 @@
         @message-event="message_event($event)"
         @open-event="open_event($event)"
       />
+      <NewFolder
+        v-if="mode == 'create_folder'"
+        :dirkey="dirkey"
+        @message-event="message_event($event)"
+        @open-event="open_event($event)"
+      />
 
     </v-main>
     <StatusBar :status="status" :message="message" />
@@ -201,6 +207,7 @@ import Clean from "./components/Clean";
 import PlainTextStoreEditor from "./components/PlainTextStoreEditor";
 import HighlightingTextStoreEditor from "./components/HighlightingTextStoreEditor";
 import NewFile from "./components/NewFile";
+import NewFolder from "./components/NewFolder";
 
 export default {
   name: "App",
@@ -214,7 +221,8 @@ export default {
     Clean,
     PlainTextStoreEditor,
     HighlightingTextStoreEditor,
-    NewFile
+    NewFile,
+    NewFolder,
   },
 
   data: () => ({
