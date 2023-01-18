@@ -6,6 +6,12 @@
       >
       <v-card-content>
         <v-form>
+          <v-file-input
+            show-size
+            label="File input"
+            @change="select_file"
+            v-model="content"
+          ></v-file-input>
           <v-text-field label="File name" v-model="file_name"></v-text-field>
           <v-text-field label="Title" v-model="title"></v-text-field>
           <v-textarea
@@ -14,12 +20,6 @@
             rows="3"
             v-model="description"
           ></v-textarea>
-          <v-file-input
-          show-size
-          label="File input"
-          @change="select_file"
-          v-model="content"
-        ></v-file-input>
         </v-form>
       </v-card-content>
       <v-card-actions>
@@ -57,16 +57,18 @@ export default {
   }),
   methods: {
     info(message, reason = null, query = null) {
-      this.message_event({ status: "INFO", message, reason, query });
+        this.message_event({ status: "INFO", message, reason, query });
     },
     error(message, reason = null, query = null) {
-      this.message_event({ status: "ERROR", message, reason, query });
+        this.message_event({ status: "ERROR", message, reason, query });
     },
     message_event(m) {
-      this.$emit("message-event", m);
+        this.$emit("message-event", m);
     },
     select_file(file){
-      this.current_file=file[0];
+        console.log("select file", file);
+        this.file_name=file.name;
+        this.current_file=file;
     },
     create(){
         console.log("Create", this.file_name);
@@ -109,9 +111,9 @@ export default {
               this.info(data.message);
               console.log("Create metadata result: ", this.result);
               this.info("Uploading "+this.current_file);
-              const form_data = new FormData()
-              form_data.append('file', this.current_file)
-              this.$http.post(this.create_data_url, form_data).then(
+              const form_data = new FormData();
+              form_data.append('file', this.current_file);
+              this.$http.post(this.upload_data_url, form_data).then(
                 function (response) {
                   response.json().then(
                     function (data) {
@@ -158,8 +160,8 @@ export default {
     create_metadata_url() {
       return this.liquer_url + "/api/store/metadata/" + this.new_key;
     },
-    create_data_url() {
-      return this.liquer_url + "/api/store/data/" + this.new_key;
+    upload_data_url() {
+      return this.liquer_url + "/api/store/upload/" + this.new_key;
     },
     contains_url() {
       return this.liquer_url + "/api/store/contains/" + this.new_key;

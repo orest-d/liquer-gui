@@ -562,6 +562,7 @@ export default {
       this.is_key = is_key;
 
       var url = "";
+      this.metadata=null;
       if (is_key) {
         this.info("Submitting key", {}, query);
         url = this.url_submit_key_prefix + query;

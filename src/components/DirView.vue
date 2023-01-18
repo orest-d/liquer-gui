@@ -1,5 +1,5 @@
 <template>
-  <v-data-table :headers="headers" :items="dir_status" hide-default-footer class="elevation-1">
+  <v-data-table :headers="headers" :items="dir_status" hide-default-footer items-per-page="-1" disable-pagination class="elevation-1">
     <template v-slot:item.icon="{ item }">
       <v-icon v-text="item.icon" />
     </template>
@@ -148,7 +148,8 @@ export default {
               if (data.status == "OK") {
                 this.dir_status = data.data;
                 for (var i = 0; i < this.dir_status.length; i++) {
-                  this.dir_status[i].icon = this.icon(this.dir_status[i]);
+                    //console.log(""+i+". "+this.dir_status[i].name);
+                    this.dir_status[i].icon = this.icon(this.dir_status[i]);
                 }
                 this.info("Dir info loaded");
               } else {
