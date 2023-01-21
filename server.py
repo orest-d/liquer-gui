@@ -11,6 +11,7 @@ import liquer.ext.lq_pandas # Add pandas support to liquer so that the dataframe
 import liquer_pcv
 from liquer.store import web_mount, mount, FileStore, get_store
 from liquer.cache import set_cache, MemoryCache
+import liquer.ext.lq_sweetviz
 import commands
 
 web_mount("gui","dist/liquer/web/gui")

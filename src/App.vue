@@ -60,6 +60,8 @@
     <v-app-bar app dense>
       <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
       <v-toolbar-title>LiQuer</v-toolbar-title>
+
+      <template v-if="mode=='content'">
       <v-menu
         :rounded="rounded"
         open-on-hover
@@ -67,23 +69,26 @@
         transition="slide-x-transition"
         bottom
         right
+        v-for="menu in tool_menu_names"
+        :key="menu"
       >
         <template v-slot:activator="{ on, attrs }">
-          <v-btn v-bind="attrs" v-on="on"> Services </v-btn>
+          <v-btn v-bind="attrs" v-on="on"> {{menu}} </v-btn>
         </template>
         <v-list dense>
           <v-list-item
-            v-for="(item, index) in services"
+            v-for="(item, index) in tools_in(menu)"
             :key="index"
             router
-            :to="item.link"
+            :href="item.link"
           >
             <v-list-item-action>
-              <v-list-item-title>{{ item.title }}</v-list-item-title>
+              <v-list-item-title>{{ item.name }}</v-list-item-title>
             </v-list-item-action>
           </v-list-item>
         </v-list>
       </v-menu>
+      </template>
 
       <v-spacer></v-spacer>
       <v-menu
@@ -250,23 +255,6 @@ export default {
     url_submit_key_prefix: "/liquer/submit/-R/",
     url_remove_prefix: "/liquer/cache/remove/",
     url_stored_meta_prefix: "/liquer/api/stored_metadata/",
-
-
-        services: [{
-                icon: "mdi-domain",
-                title: "Media Monitoring",
-                link: "/mmrservices"
-            },
-            {
-                icon: "mdi-message-text",
-                title: "Audience Measurement",
-                link: "/amrservices"
-            },
-            {
-                icon: "mdi-flag",
-                title: "Integration Analysis"
-            }
-        ],
 
 
     liquer_url: "/liquer",
@@ -643,6 +631,9 @@ export default {
       }
       return query_basis;
     },
+    tools_in(menu){
+        return this.tools_data.filter(item => item.menu == menu);
+    }
   },
   computed: {
     can_edit() {
@@ -661,6 +652,25 @@ export default {
         typeof this.key == "string" &&
         this.key.endsWith(".yaml")
       );
+    },
+    tools_data(){
+      if (this.metadata == null){
+          return [];
+      }
+      if (Object.prototype.hasOwnProperty.call(this.metadata, "tools")){
+          return this.metadata.tools;
+      }
+      return [];   
+    },
+    tool_menu_names() {
+      var menu = [];
+      for (const item of this.tools_data){
+          if (!menu.includes(item.menu)){
+              menu.push(item.menu);
+          }
+      }
+      menu.sort();
+      return menu;
     },
   },
   created() {
