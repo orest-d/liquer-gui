@@ -8,8 +8,9 @@ import liquer.ext.basic
 import liquer.ext.meta
 from liquer.recipes import RecipeSpecStore
 import liquer.ext.lq_pandas # Add pandas support to liquer so that the dataframe conversions work
+import liquer.ext.lq_sweetviz
 import liquer_pcv
-from liquer.store import web_mount, mount, FileStore
+from liquer.store import web_mount, mount, FileStore, get_store
 from liquer.cache import set_cache, MemoryCache, FileCache
 from liquer.state import set_var, get_vars
 from liquer.pool import set_central_cache
@@ -21,7 +22,9 @@ import tornado
 import commands
 
 web_mount("gui","dist/liquer/web/gui")
-mount("data", RecipeSpecStore(FileStore("liquer-gui/examples/data")))
+mount("data", RecipeSpecStore(FileStore("liquer-gui/examples/data").with_indexer()))
+print("STORE",get_store())
+
 set_cache(MemoryCache())
 url_prefix='/liquer'
 

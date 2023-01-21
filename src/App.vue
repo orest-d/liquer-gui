@@ -123,6 +123,7 @@
       <v-btn v-if="can_edit" href="#-i-mode/edit">Edit</v-btn>
       <v-btn v-if="mode == 'content'" href="#-i-mode/metadata">Metadata</v-btn>
       <v-btn v-if="mode == 'metadata'" href="#-i-mode/content">Content</v-btn>
+      <v-btn v-if="mode == 'metadata'" :href="raw_metadata_url">Raw</v-btn>
     </v-app-bar>
     <v-main>
       <!--  -->
@@ -255,7 +256,7 @@ export default {
     url_submit_key_prefix: "/liquer/submit/-R/",
     url_remove_prefix: "/liquer/cache/remove/",
     url_stored_meta_prefix: "/liquer/api/stored_metadata/",
-
+    url_meta_for_key_prefix: "/liquer/api/store/metadata/",
 
     liquer_url: "/liquer",
     html: "",
@@ -671,6 +672,14 @@ export default {
       }
       menu.sort();
       return menu;
+    },
+    raw_metadata_url(){
+        if (this.is_key){
+            return this.url_meta_for_key_prefix+this.key;
+        }
+        else{
+            return this.url_stored_meta_prefix+this.query;
+        }
     },
   },
   created() {
