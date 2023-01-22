@@ -15,7 +15,7 @@ import liquer.ext.lq_sweetviz
 import commands
 
 web_mount("gui","dist/liquer/web/gui")
-mount("data", RecipeSpecStore(FileStore("liquer-gui/examples/data")))
+mount("data", RecipeSpecStore(FileStore("liquer-gui/examples/data").with_indexer()))
 
 ### Create Flask app and register LiQuer blueprint
 from flask import Flask

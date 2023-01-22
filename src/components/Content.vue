@@ -74,10 +74,10 @@
         <img :src="external_link" aspect-ratio="1" style="width:100%; height:100%;object-fit: scale-down;"/>
     </div>
     <v-layout row wrap v-if="mode == 'dataframe'">
-      <v-flex
+      <!-- v-flex
         >Pandas version: {{ data.schema.pandas_version }}
         <v-btn :href="pcv_query">PointCloud Viewer</v-btn>
-      </v-flex>
+      </v-flex -->
       <v-flex xs12 v-if="data != null">
         <v-data-table
           :headers="dataframe_headers"

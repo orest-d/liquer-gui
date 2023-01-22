@@ -47,3 +47,4 @@ bash buils_liquer_gui.sh
 - 2022-01-03 - v0.1.0  - many enhancements, first relatively usable release
 - 2022-01-12 - v0.1.4  - bugfixes, experimental syntax highlighting editor for yaml
 - 2022-01-25 - v0.1.5  - minor enhancements, fixing a faulty release
+- 2023-01-22 - v0.2.0  - adding support for tools, create/upload files, raw metadata view

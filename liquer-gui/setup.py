@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="liquer-gui",
-    version="0.1.5",
+    version="0.2.0",
     author="Orest Dubay",
     author_email="orest3.dubay@gmail.com",
     description="""LiQuer GUI - user interface for LiQuer.""",
